@@ -1,11 +1,11 @@
 # POSTGRES SETUP
 
-* [Linux](https://github.com/sthasam2/bumblebee-backend#linux-system)
-* [Windows](https://github.com/sthasam2/bumblebee-backend#windows-system)
+* [Linux](https://github.com/sthasam2/bumblebee-backend/blob/main/docs/database_setup.md#linux-system)
+* [Windows](https://github.com/sthasam2/bumblebee-backend/blob/main/docs/database_setup.md#-windows-system)
 
 ---
 
-## **Linux System** 
+## Linux System
 
  **OS:** UBUNTU 20.10
 
@@ -113,7 +113,7 @@ postgres$: psql
 
 ---
 
-## ** Windows System**
+## Windows System
 
  **OS:** WINDOWS 10
 
