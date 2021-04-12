@@ -1,7 +1,7 @@
 # POSTGRES SETUP
 
 * [Linux](https://github.com/sthasam2/bumblebee-backend/blob/main/docs/database_setup.md#linux-system)
-* [Windows](https://github.com/sthasam2/bumblebee-backend/blob/main/docs/database_setup.md#-windows-system)
+* [Windows](https://github.com/sthasam2/bumblebee-backend/blob/main/docs/database_setup.md#windows-system)
 
 ---
 
