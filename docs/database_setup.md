@@ -10,7 +10,7 @@
  **OS:** UBUNTU 20.10
 
  
-*Source: [Digital Ocean Setup Postgres]([https://link](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-16-04))*
+Source: [Digital Ocean Setup Postgres]([https://link](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-16-04))
 
 ### Steps
 
@@ -117,7 +117,7 @@ postgres$: psql
 
  **OS:** WINDOWS 10
 
-*Source: [PostgreSQL on Windows]([https://link](https://www.postgresqltutorial.com/install-postgresql/))*
+Source: [PostgreSQL on Windows]([https://link](https://www.postgresqltutorial.com/install-postgresql/))
 
 ## Steps
 
