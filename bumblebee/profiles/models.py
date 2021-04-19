@@ -9,7 +9,9 @@ from .validators import validate_date_lt_today
 class Profile(models.Model):
     """"""
 
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        CustomUser, related_name="profile", on_delete=models.CASCADE
+    )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -32,7 +34,11 @@ class Profile(models.Model):
         help_text="Nickname. The name you want to be called. For eg. Will",
     )
     dob = models.DateTimeField(
-        name="Date of Birth", validators=[validate_date_lt_today]
+        name="DOB",
+        validators=[validate_date_lt_today],
+        null=True,
+        unique=False,
+        blank=True,
     )
     location = models.CharField(
         name="Location",
@@ -45,7 +51,12 @@ class Profile(models.Model):
         message="Phone number. It must contain Dialing code and contact number. For eg. +977980000000000",
     )
     phone = models.CharField(
-        name="Contact number", validators=[phone_validator], max_length=17, unique=True
+        name="Phone",
+        validators=[phone_validator],
+        max_length=17,
+        unique=True,
+        blank=True,
+        null=True,
     )
     phone_verified = models.BooleanField(name="Contact number verified", default=False)
 

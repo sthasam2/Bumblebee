@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.db.models.signals import post_save
 
 
 class CustomUserManager(BaseUserManager):
@@ -25,6 +26,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Password is mandatory")
 
         email = self.normalize_email(email)
+        print(self)
         new_user = self.model(email=email, username=username)
         new_user.set_password(password)
         new_user.email_verified = is_email_verified
@@ -34,6 +36,7 @@ class CustomUserManager(BaseUserManager):
         new_user.active = extra_fields["is_active"]
 
         new_user.save(using=self._db)
+        print("created user")
 
         return new_user
 

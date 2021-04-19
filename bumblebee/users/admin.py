@@ -1,8 +1,8 @@
-from __future__ import unicode_literals
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
+from django.contrib.contenttypes.models import ContentType
+
 
 from .forms import UserAdminChangeForm, UserAdminCreationForm
 from .models import CustomUser
@@ -17,7 +17,7 @@ class CustomUserAdmin(BaseUserAdmin):
         "username",
         "registered_date",
     )
-    list_filter = ("staff", "active", "superuser", "email_verified")
+    list_filter = ("staff", "active", "admin", "email_verified")
     fieldsets = (
         ("Required", {"fields": ("username", "email", "password")}),
         ("Permissions", {"fields": ("admin", "staff", "active")}),
@@ -43,4 +43,5 @@ class CustomUserAdmin(BaseUserAdmin):
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(ContentType)
 admin.site.unregister(Group)

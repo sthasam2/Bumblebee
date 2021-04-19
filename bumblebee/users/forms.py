@@ -32,7 +32,7 @@ class UserAdminCreationForm(forms.ModelForm):
 
         new_user = super(UserAdminCreationForm, self).save(commit=False)
         new_user.set_password(self.cleaned_data["password1"])
-        new_user.save(commit=commit)
+        new_user.save()
         return new_user
 
 
@@ -46,7 +46,7 @@ class UserAdminChangeForm(forms.ModelForm):
             "email",
             "password",
             "active",
-            "superuser",
+            "admin",
             "staff",
             "email_verified",
         )

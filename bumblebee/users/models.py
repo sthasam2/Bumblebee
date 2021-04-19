@@ -1,14 +1,19 @@
+import uuid as _uuid
+
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 from bumblebee.users.managers import CustomUserManager
+from django.db.models.signals import post_save
 
 
 class CustomUser(AbstractBaseUser):
     """
     Custom extension of the AbstractBaseUser to create a custom user field
     """
+
+    uuid = models.UUIDField(primary_key=True, default=_uuid.uuid5, editable=False)
 
     username = models.CharField(
         max_length=150,
@@ -36,8 +41,8 @@ class CustomUser(AbstractBaseUser):
     objects = CustomUserManager()
 
     class Meta:
-        verbose_name = "User"
-        verbose_name_plural = "Users"
+        verbose_name = "Custom User"
+        verbose_name_plural = "Custom Users"
 
     def __str__(self):
         return self.email
