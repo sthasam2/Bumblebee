@@ -34,7 +34,7 @@ class UserActivity(models.Model):
 
     user = models.ForeignKey(
         CustomUser,
-        related_name="useractivity",
+        related_name="activity_of",
         db_index=True,
         on_delete=models.CASCADE,
     )
@@ -43,11 +43,20 @@ class UserActivity(models.Model):
         max_length=250, choices=Actions.choices
     )  # the action of the user
 
+    action_content = models.ForeignKey(
+        ContentType,
+        blank=True,
+        null=True,
+        related_name="activity_object",
+        on_delete=models.CASCADE,
+    )  # the action object
+    action_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+
     target_content = models.ForeignKey(
         ContentType,
         blank=True,
         null=True,
-        related_name="target_object",
+        related_name="activity_target",
         on_delete=models.CASCADE,
     )  # the target object
     target_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
@@ -55,11 +64,16 @@ class UserActivity(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        """
+        Additional meta info
+        """
+
         verbose_name = "User Activity"
         verbose_name_plural = "User Activities"
         ordering = ("-created_date",)
 
-    # def create_activity():
-
     def __str__(self):
-        return f"{self.user} {self.action} {self.target_content}:{self.target_id}"
+        """
+        default string method when object called
+        """
+        return f"User:{self.user}  Action: {self.get_action_display()}  Target: {self.target_content}--id:{self.target_id}"

@@ -25,10 +25,16 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "rest_framework.authtoken",
+    "drf_yasg",  # for docs generation
 ]
 
 LOCAL_APPS = [
     "bumblebee.activities.apps.ActivitiesConfig",
+    "bumblebee.buzzes.apps.BuzzesConfig",
+    "bumblebee.core.apps.CoreConfig",
+    "bumblebee.comments.apps.CommentsConfig",
+    "bumblebee.notifications.apps.NotificationsConfig",
     "bumblebee.profiles.apps.ProfilesConfig",
     "bumblebee.users.apps.UsersConfig",
 ]
@@ -113,3 +119,27 @@ STATIC_URL = "/static/"
 
 
 AUTH_USER_MODEL = "users.CustomUser"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# REST FRAMEWORK
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+}
+
+
+# SMTP EMAIL
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = get_environ_variable("EMAIL_USER")
+EMAIL_HOST_PASSWORD = get_environ_variable("EMAIL_PASSWORD")

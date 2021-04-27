@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Buzz, Rebuzz, BuzzInteractions
+
+
+admin.site.register(Buzz)
+admin.site.register(Rebuzz)
+admin.site.register(BuzzInteractions)

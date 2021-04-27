@@ -12,8 +12,8 @@ class Profile(models.Model):
     user = models.OneToOneField(
         CustomUser, related_name="profile", on_delete=models.CASCADE
     )
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
 
     account_verified = models.BooleanField(default=False)
 
@@ -59,6 +59,18 @@ class Profile(models.Model):
         null=True,
     )
     phone_verified = models.BooleanField(name="Contact number verified", default=False)
+
+    # def __init__(self, *args, **kwargs):
+    #     """
+    #     Overriding init method
+    #     """
+    #     super(Profile, self).__init__(*args, **kwargs)
+
+    # def save(self, *args, **kwargs):
+    #     """
+    #     Overriding default save method
+    #     """
+    #     super(Profile, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.username} Profile"

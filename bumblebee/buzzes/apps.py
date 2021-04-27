@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class BuzzConfig(AppConfig):
+class BuzzesConfig(AppConfig):
     name = "bumblebee.buzzes"
 
     def ready(self):

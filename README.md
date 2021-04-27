@@ -4,6 +4,10 @@ A social media for YOU
 
 ---
 
+### Changelogs
+
+Find the Changlogs @[docs/changelogs.md](docs/changelogs.md)
+
 ### Dependedencies
 
 #### **Main Dependencies**
@@ -11,7 +15,7 @@ A social media for YOU
 *   **Python 3.8**
 *   **pip** ( python default package manager)
 *   **poetry** ( Package and virtualenv manager | `pip install poetry`)
-*   **PostgreSQL** (database | *[Check docs for full setup process](https://github.com/sthasam2/bumblebee-backend/blob/main/docs/database_setup.md)*)
+*   **PostgreSQL** (database | *[Check docs for full setup process](docs/database_setup.md)*)
 
 ## Installation
 

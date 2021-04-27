@@ -1,11 +1,12 @@
-import uuid as _uuid
+import datetime as dt
+from django.db.models.enums import TextChoices
 
+import pytz
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
-from bumblebee.users.managers import CustomUserManager
-from django.db.models.signals import post_save
+from .managers import CustomUserManager
 
 
 class CustomUser(AbstractBaseUser):
@@ -13,20 +14,19 @@ class CustomUser(AbstractBaseUser):
     Custom extension of the AbstractBaseUser to create a custom user field
     """
 
-    uuid = models.UUIDField(primary_key=True, default=_uuid.uuid5, editable=False)
-
     username = models.CharField(
         max_length=150,
         unique=True,
-        null=True,
-        blank=False,
+        db_index=True,
         help_text="Username. example: sam_smith",
     )
     email = models.EmailField(
         max_length=150,
         unique=True,
+        db_index=True,
         help_text="Email address. example: example@example.domain",
     )
+
     registered_date = models.DateTimeField(auto_now_add=True)
     email_verified = models.BooleanField(default=False)
 
@@ -46,12 +46,6 @@ class CustomUser(AbstractBaseUser):
 
     def __str__(self):
         return self.email
-
-    def _send_verification_mail(self):
-        pass
-
-    def get_username(self):
-        return self.username
 
     def has_perm(self, perm, obj=None):
         return True
@@ -74,3 +68,37 @@ class CustomUser(AbstractBaseUser):
     @property
     def is_email_verified(self):
         return self.email_verified
+
+
+class EmailToken(models.Model):
+    """
+    A token for email verification
+    """
+
+    class Purpose(models.TextChoices):
+        """"""
+
+        EMAIL_VERIFICATION = "e_ver", "Email Verification"
+        PASSWORD_RESET = "p_rst", "Password Reset"
+
+    purpose = models.CharField(max_length=50, choices=Purpose.choices)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    token = models.CharField(max_length=50)
+    created_date = models.DateTimeField(auto_now_add=True)
+    expired = models.BooleanField(default=False)
+    used = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.token
+
+    # @property
+    # def check_expired(self, *args, **kwargs):
+    #     """
+    #     Check expired email
+    #     """
+    #     td = pytz.timezone("UTC").localize(dt.datetime.utcnow()) - self.created_date
+    #     if td.total_seconds > (15 * 60):
+    #         self.expired = True
+    #         super().save(*args, **kwargs)
+
+    #     return self.expired
