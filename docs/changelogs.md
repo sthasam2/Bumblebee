@@ -1,5 +1,18 @@
 # Changelogs
 
+## v.0.1.3: Added User API views, logic
+
+1. Added Django REST API for  
+
+   a. Logout
+   b. Email Verification: Sending emails POST, confirming verifications GET
+   c. Resetting Password: Sending emails GET, confirming verification POST
+
+2. Renamed API documentation endpoints using drf-yafg  
+
+   a. api/docs/redoc
+   b. api/docs/swagger
+
 ## v.0.1.2: Added Apps, Models, API, Increased Dependencies
 
 1. Apps: Added apps chats, comments, core. Modified users.  

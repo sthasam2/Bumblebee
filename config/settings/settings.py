@@ -11,10 +11,7 @@ from .utils import get_environ_variable
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = get_environ_variable("DJANGO_SECRET_KEY")
 DEBUG = True
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -80,12 +77,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_environ_variable("PSQL_NAME"),
-        "USER": get_environ_variable("PSQL_USER"),
-        "PASSWORD": get_environ_variable("PSQL_PASSWORD"),
-        "HOST": get_environ_variable("PSQL_HOST"),
-        "PORT": "",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 

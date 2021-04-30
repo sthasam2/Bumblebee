@@ -2,12 +2,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
 from bumblebee.activities.models import UserActivity
 from bumblebee.activities.utils import _create_activity
 from bumblebee.profiles.models import Profile
 from config.definitions import DEBUG
-
 
 from .models import CustomUser
 
@@ -18,21 +16,11 @@ def post_save_create_save_profile_and_activity(sender, instance, created, **kwar
         if DEBUG:
             print(
                 f"`post_save_create_save_profile_and_activity` signal received!",
-                # "\n sender={sender.__name__}",
             )
 
         # create profile
-
         Profile.objects.create(user=instance)
 
-        ##  create activities
-        # user account
-        # UserActivity.objects.create(
-        #     user=instance,
-        #     action=UserActivity.Actions.SIGN_UP,
-        #     target_content=ContentType.objects.get_for_model(CustomUser),
-        #     target_id=instance.id,
-        # )
         _create_activity(
             user=instance,
             action=UserActivity.Actions.SIGN_UP,
@@ -40,9 +28,12 @@ def post_save_create_save_profile_and_activity(sender, instance, created, **kwar
             target_id=instance.id,
         )
         # profile
-        UserActivity.objects.create(
+        _create_activity(
             user=instance,
             action=UserActivity.Actions.CREATE,
             target_content=ContentType.objects.get_for_model(Profile),
             target_id=instance.profile.id,
         )
+
+
+# TODO custom email verified signal

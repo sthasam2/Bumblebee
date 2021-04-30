@@ -11,70 +11,87 @@ class Error(Exception):
     pass
 
 
-class PreExistenceError(Error):
+class CustomBaseError(Error):
     """
-    Exception raised when a value already exists somewhere
+    Base for customized errors
 
     Parameters
     ---
     instance: given instance which caused error
     message: message for given error
+
     """
 
+    name = None
+
     def __init__(self, instance=None, message=None):
+        self.name = type(self).__name__
         self.instance = instance
         self.message = message
 
     def __str__(self):
         return f"""
-        PreExistenceError:
+        {self.name}:
         \n\tcause: {self.instance} 
         \n\tmessage: {self.message}
         \n\ttreeback: {self.with_traceback}
         """
 
+    class Meta:
+        abstract = True
 
-class UnmatchedFieldsError(Error):
+
+class MissingFieldsError(CustomBaseError):
     """
     Exception raised when a value already exists somewhere
-
-    Parameters
-    ---
-    instance: given instance which caused error
-    message: message for given error
     """
 
-    def __init__(self, instance=None, message=None):
-        self.instance = instance
-        self.message = message
-
-    def __str__(self):
-        return f"""
-        UnmatchedFieldsError:
-        \n\tcause: {self.instance}
-        \n\tmessage: {self.message}
-        \n\ttreeback: {self.with_traceback}
-        """
+    pass
 
 
-class EmailNotVerifiedError(Error):
+class PreExistenceError(CustomBaseError):
+    """
+    Exception raised when a value already exists somewhere
+    """
+
+    pass
+
+
+class NoneExistenceError(CustomBaseError):
+    """
+    Exception raised when a value already doesnt exists
+    """
+
+    pass
+
+
+class UnmatchedFieldsError(CustomBaseError):
+    """
+    Exception raised when a value already exists somewhere
+    """
+
+    pass
+
+
+class AlreadyEmailVerifiedError(CustomBaseError):
     """
     Exception raised when a user has not verified his email
-
-    Parameters
-    ---
-    instance: given instance which caused error
-    message: message for given error
     """
 
-    def __init__(self, instance=None, message=None):
-        self.instance = instance
-        self.message = message
+    pass
 
-    def __str__(self):
-        return f"""
-        EmailNotVerifiedError:
-        \n\tcause: {self.instance}
-        \n\tmessage: {self.message}
-        \n\ttreeback: {self.with_traceback}
-        """
+
+class EmailNotVerifiedError(CustomBaseError):
+    """
+    Exception raised when a user has not verified his email
+    """
+
+    pass
+
+
+class ExpiredError(CustomBaseError):
+    """
+    Exception raised when a token is expired
+    """
+
+    pass

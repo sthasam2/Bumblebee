@@ -62,6 +62,25 @@ class DbExistenceChecker:
         """
         return CustomUser.objects.filter(email=email).exists()
 
+    def check_token_existence(self, user, token: str) -> bool:
+        """
+        Checks whether any user with given username exists and returns true or false
+        """
+
+        return EmailToken.objects.filter(token=token).exists()
+
+    def check_return_user_existence(self, *args, **kwargs) -> bool:
+        """
+        Checks whether any user with given username exists and returns true or false
+        """
+        return CustomUser.objects.get(**kwargs)
+
+    def check_return_token_existence(self, token: str, *args, **kwargs) -> bool:
+        """
+        Checks whether any user with given username exists and returns true or false
+        """
+        return EmailToken.objects.get(token=token)
+
 
 #######################
 # Network methods
@@ -118,16 +137,17 @@ class EmailSender:
 
             message = render_to_string("users/password_reset.html", context)
 
-            email = EmailMessage(
+            email = send_mail(
                 subject="[BUMBLEBEE] Account Password Reset",
-                body=message,
-                to=[user.email],
+                from_email="Bumblebee Team",
+                message="Reset Password",
+                html_message=message,
+                recipient_list=[user.email],
             )
-            email.send()
 
         except Exception as e:
             if DEBUG:
-                print(e)
+                print("Error @ send_password_reset_email()", e)
 
 
 # TODO add logic

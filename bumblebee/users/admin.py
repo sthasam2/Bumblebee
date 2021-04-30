@@ -21,6 +21,7 @@ class CustomUserAdmin(BaseUserAdmin):
     fieldsets = (
         ("Required", {"fields": ("username", "email", "password")}),
         ("Permissions", {"fields": ("admin", "staff", "active")}),
+        ("Verifications", {"fields": ("email_verified",)}),
     )
     add_fieldsets = (
         (

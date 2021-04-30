@@ -68,14 +68,14 @@
 					Please confirm <b>'{{user.email}}'</b> as your email by clicking the following
 					link:<br />
 					<a
-						href="http://{{domain}}{% url 'confirm-email-verification' username=user.username uidb64=uid token=token %}"
+						href="http://{{domain}}{% url 'confirm-email-verification' uidb64=uid token=token %}"
 					>
 						<b>Click here</b></a
 					><br />
 					Or, copy the following link into your browser:<br />
 					<b>
-						href="http://{{domain}}{% url 'confirm-email-verification'
-						username=user.username uidb64=uid token=token %}
+						href="http://{{domain}}{% url 'confirm-email-verification' uidb64=uid
+						token=token %}
 					</b>
 					<br /><br />
 					Sincerely, <br />

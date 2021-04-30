@@ -76,7 +76,9 @@ class EmailToken(models.Model):
     """
 
     class Purpose(models.TextChoices):
-        """"""
+        """
+        Choices for Token creation purpose
+        """
 
         EMAIL_VERIFICATION = "e_ver", "Email Verification"
         PASSWORD_RESET = "p_rst", "Password Reset"
@@ -91,14 +93,14 @@ class EmailToken(models.Model):
     def __str__(self):
         return self.token
 
-    # @property
-    # def check_expired(self, *args, **kwargs):
-    #     """
-    #     Check expired email
-    #     """
-    #     td = pytz.timezone("UTC").localize(dt.datetime.utcnow()) - self.created_date
-    #     if td.total_seconds > (15 * 60):
-    #         self.expired = True
-    #         super().save(*args, **kwargs)
+    @property
+    def check_expired(self, *args, **kwargs):
+        """
+        Check expired email
+        """
+        td = pytz.timezone("UTC").localize(dt.datetime.utcnow()) - self.created_date
+        if td.total_seconds() > (15 * 60):
+            self.expired = True
+            super().save(*args, **kwargs)
 
-    #     return self.expired
+        return self.expired

@@ -13,4 +13,10 @@ def check_email_username_valid(email: str, username: str) -> bool:
         return True
 
 
-# def create_validation_message()
+# class RequestValidater:
+
+#     def validate_req_data(req_body, required_fields, *args, **kwargs):
+#         """
+#         """
+
+#         for key, value in req_body

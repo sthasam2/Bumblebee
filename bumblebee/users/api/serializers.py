@@ -1,3 +1,4 @@
+from django.db.models.fields import EmailField
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -8,6 +9,25 @@ class CreateUserSerializer(serializers.ModelSerializer):
     """
     Model Serializer for creating CustomUser model
     """
+
+    username = serializers.CharField(
+        max_length=150,
+        required=True,
+        help_text="Username. example: sam_smith",
+        style={"input_type": "text", "placeholder": "Username"},
+    )
+    email = serializers.EmailField(
+        max_length=150,
+        required=True,
+        help_text="Email address. example: example@example.domain",
+        style={"input_type": "email", "placeholder": "Email"},
+    )
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="New password for ",
+        style={"input_type": "password", "placeholder": "Password"},
+    )
 
     class Meta:
         model = CustomUser
@@ -30,6 +50,12 @@ class CreateUserSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
         )
         return created_user
+
+
+class SendEmailVerificationSerializer(serializers.Serializer):
+    """ """
+
+    email = serializers.EmailField(help_text="Email for verification resend")
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -64,3 +90,41 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         )
 
         return data
+
+
+class LogoutSerializer(serializers.Serializer):
+    """ """
+
+    refresh_token = serializers.CharField(
+        help_text="Refresh token used for obtaining access token"
+    )
+
+
+class SendResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        max_length=150,
+        required=True,
+        help_text="Email address of account for resetting password",
+        style={"input_type": "email", "placeholder": "Email"},
+    )
+
+
+class ConfirmResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        max_length=150,
+        required=True,
+        help_text="Email address of account for resetting password",
+        style={"input_type": "email", "placeholder": "Email"},
+    )
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="New password for given user",
+        style={"input_type": "password", "placeholder": "Password"},
+    )
+    token = serializers.CharField(
+        max_length=150,
+        required=True,
+        help_text="Token for resetting password sent in the mail",
+        style={"input_type": "text", "placeholder": "Token"},
+    )

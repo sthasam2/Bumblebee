@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "bumblebee_backend"
-version = "0.1.0"
-description = ""
-authors = ["Sambeg Shrestha <sthasam2@gmail.com>"]
+version = "0.1.3"
+description = "A social media for YOU"
+authors = ["The Godfathers"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
