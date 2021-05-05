@@ -1,8 +1,14 @@
 from django.db.models.fields import EmailField
+
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from ..models import CustomUser
+from ..utils import DbExistenceChecker
+
+##########################
+#          AUTH
+##########################
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -58,40 +64,6 @@ class SendEmailVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField(help_text="Email for verification resend")
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializers for CustomUser model
-    """
-
-    class Meta:
-        model = CustomUser
-        fields = "__all__"
-
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """ """
-
-    @classmethod
-    def get_token(cls, user):
-        return super().get_token(user)
-
-    def validate(self, attrs):
-        """
-        serializer validate method
-        """
-
-        data = super().validate(attrs)
-
-        data["user_details"] = dict(
-            username=self.user.username,
-            email=self.user.email,
-            id=self.user.id,
-            email_verified=self.user.email_verified,
-        )
-
-        return data
-
-
 class LogoutSerializer(serializers.Serializer):
     """ """
 
@@ -128,3 +100,155 @@ class ConfirmResetPasswordSerializer(serializers.Serializer):
         help_text="Token for resetting password sent in the mail",
         style={"input_type": "text", "placeholder": "Token"},
     )
+
+
+##########################
+#          JWT
+##########################
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """ """
+
+    @classmethod
+    def get_token(cls, user):
+        return super().get_token(user)
+
+    def validate(self, attrs):
+        """
+        serializer validate method
+        """
+
+        # username = attrs["username"]
+        # exists = DbExistenceChecker().check_username_existence
+
+        data = super().validate(attrs)
+
+        data["user_details"] = dict(
+            username=self.user.username,
+            email=self.user.email,
+            id=self.user.id,
+            email_verified=self.user.email_verified,
+        )
+
+        return data
+
+
+##########################
+#          USER
+##########################
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializers for CustomUser model
+    """
+
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email", "registered_date", "active", "id"]
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    """
+    Serializers for CustomUser model
+    """
+
+    current_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="Current password ",
+        style={"input_type": "password", "placeholder": "Current Password"},
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email", "active", "password"]
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    """ """
+
+    current_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="Current password ",
+        style={"input_type": "password", "placeholder": "Current Password"},
+    )
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="New password ",
+        style={"input_type": "password", "placeholder": "New Password"},
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ["current_password", "password"]
+
+
+class DeactivateSerializer(serializers.ModelSerializer):
+    """ """
+
+    current_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="Current password ",
+        style={"input_type": "password", "placeholder": "Current Password"},
+    )
+    active = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="Activate or Decativate the account. True for activate, False for Deactivate",
+        style={"input_type": "text", "placeholder": "Activate/Deactivate"},
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ["active", "current_password"]
+
+
+class ActivateSerializer(serializers.Serializer):
+    """ """
+
+    current_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="Current password ",
+        style={"input_type": "password", "placeholder": "Current Password"},
+    )
+    username = serializers.CharField(
+        max_length=150,
+        required=True,
+        help_text="Username. example: sam_smith",
+        style={"input_type": "text", "placeholder": "Username"},
+    )
+    email = serializers.EmailField(
+        max_length=150,
+        required=True,
+        help_text="Email address. example: example@example.domain",
+        style={"input_type": "email", "placeholder": "Email"},
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "username",
+            "email",
+            "current_password",
+        ]
+
+
+class DeleteUserSerializer(serializers.ModelSerializer):
+    """ """
+
+    current_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text="Current password ",
+        style={"input_type": "password", "placeholder": "Current Password"},
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ["current_password"]

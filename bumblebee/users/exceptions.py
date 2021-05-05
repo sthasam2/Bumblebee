@@ -1,6 +1,7 @@
 """
 Custom Exceptions
 """
+from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 
 
 class Error(Exception):
@@ -24,17 +25,19 @@ class CustomBaseError(Error):
 
     name = None
 
-    def __init__(self, instance=None, message=None):
+    def __init__(self, instance=None, message=None, summary=None):
         self.name = type(self).__name__
         self.instance = instance
         self.message = message
+        self.summary = summary
 
     def __str__(self):
         return f"""
         {self.name}:
         \n\tcause: {self.instance} 
+        \n\summary: {self.summary}
         \n\tmessage: {self.message}
-        \n\ttreeback: {self.with_traceback}
+        \n\ttreeback: {self.with_traceback()}
         """
 
     class Meta:
@@ -43,7 +46,23 @@ class CustomBaseError(Error):
 
 class MissingFieldsError(CustomBaseError):
     """
-    Exception raised when a value already exists somewhere
+    Exception raised when fields are missing
+    """
+
+    pass
+
+
+class ExtraFieldsError(CustomBaseError):
+    """
+    Exception raised when fields are extra than required
+    """
+
+    pass
+
+
+class UrlParameterError(CustomBaseError):
+    """
+    Exception raised when url parameter is wrong
     """
 
     pass
@@ -93,5 +112,17 @@ class ExpiredError(CustomBaseError):
     """
     Exception raised when a token is expired
     """
+
+    pass
+
+
+class PermissionDeniedError(PermissionDenied):
+    """ """
+
+    pass
+
+
+class NotAuthenticatedError(NotAuthenticated):
+    """ """
 
     pass

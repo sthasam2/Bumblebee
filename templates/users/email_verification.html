@@ -73,10 +73,9 @@
 						<b>Click here</b></a
 					><br />
 					Or, copy the following link into your browser:<br />
-					<b>
-						href="http://{{domain}}{% url 'confirm-email-verification' uidb64=uid
-						token=token %}
-					</b>
+					<b><pre>
+						http://{{domain}}{% url 'confirm-email-verification' uidb64=uid token=token %}
+					</b></pre>
 					<br /><br />
 					Sincerely, <br />
 					<b> The Bumblebee Team </b>

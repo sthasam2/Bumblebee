@@ -82,6 +82,7 @@ class EmailToken(models.Model):
 
         EMAIL_VERIFICATION = "e_ver", "Email Verification"
         PASSWORD_RESET = "p_rst", "Password Reset"
+        ACTIVATE_ACCOUNT = "act_acc", "Activate Account"
 
     purpose = models.CharField(max_length=50, choices=Purpose.choices)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

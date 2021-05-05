@@ -2,8 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 
 from config.definitions import DEBUG
 
-# from .exceptions import PreExistenceError, UnmatchedFieldsError
-# from .utils import check_email_existence, check_username_existence
+from .exceptions import NoneExistenceError, PreExistenceError
 
 
 class CustomUserManager(BaseUserManager):
@@ -121,48 +120,88 @@ class CustomUserManager(BaseUserManager):
         if self._check_extra_fields(**extra_fields):
             return self._create_user(username, email, password, False, **extra_fields)
 
-    # def update_user(self, userid, **fields):
-    #     """
-    #     Updates user account details like username
+    def update_user(self, userid, **fields):
+        """
+        Updates user account details like username
 
-    #     Note
-    #     """
-    #     try:
+        Note
+        """
+        try:
 
-    #         if not fields["username"] or not fields["email"] or not fields["password"]:
-    #             raise KeyError("No keys provided!")
+            if DEBUG:
+                print("update_user")
 
-    #         if fields["username"]:
-    #             username = fields["username"]
-    #             username_user = super().get_queryset().filter(username__exact=username)
+            field_options = ["username", "email", "password", "active"]
+            included = list()
+            for key, value in fields.items():
+                if key in field_options:
+                    included.append(key)
 
-    #             if username_user:
-    #                 raise PreExistenceError(
-    #                     username,
-    #                     f'username "{username}" already taken. Try other username',
-    #                 )
+            if len(included) == 0:
+                raise KeyError("No keys provided!")
 
-    #         if fields["email"]:
-    #             email = fields["email"]
-    #             if check_email_existence(email):
-    #                 raise PreExistenceError(
-    #                     email, f'username "{email}" already taken. Try other email'
-    #                 )
-    #             email_user = super().get_queryset().filter(email__exact=email)
+            new_username = fields.get("username", False)
+            new_email = fields.get("email", False)
+            new_password = fields.get("password", False)
+            new_active = fields.get("active", False)
 
-    #         if username_user and email_user:
-    #             if username_user.id != email_user.id:
-    #                 raise UnmatchedFieldsError(
-    #                     {"fields": [username, email]},
-    #                     "Fields do not match! Given field values do not belong to same user!",
-    #                 )
+            user_to_update = super().get(pk=userid)
 
-    #     except PreExistenceError as error:
-    #         print(error)
+            if not user_to_update:
+                raise NoneExistenceError(
+                    instance=userid,
+                    message={
+                        "status": 400,
+                        "error": {
+                            "message": "Non Existence",
+                            "detail": f"Provided userid credentials to `update_user` does not match any users",
+                        },
+                    },
+                )
 
-    #     except UnmatchedFieldsError as error:
-    #         print(error)
+            if new_username:
+                if super().filter(username=new_username).exists():
+                    raise PreExistenceError(
+                        instance=new_username,
+                        message={
+                            "status": 400,
+                            "error": {
+                                "message": "Already Exists",
+                                "detail": f'username "{new_username}" already taken. Try other username',
+                            },
+                        },
+                    )
+                user_to_update.username = new_username
 
+            if new_email:
+                new_email = self.normalize_email(new_email)
+                if super().filter(email=new_email).exists():
+                    raise PreExistenceError(
+                        instance=new_email,
+                        message={
+                            "status": 400,
+                            "error": {
+                                "message": "Already Exists",
+                                "detail": f'email "{new_email}" already taken. Try other username',
+                            },
+                        },
+                    )
+                user_to_update.email = new_email
 
-# TODO add logic to update_user
-# NOTE cant use objects inside manager
+            if new_password:
+                user_to_update.set_password(new_password)
+
+            if fields.__contains__("active"):
+                user_to_update.active = new_active
+
+            user_to_update.save()
+
+            return user_to_update
+
+        except (PreExistenceError, NoneExistenceError) as error:
+            print(error.name, error)
+            raise error
+
+        except Exception as error:
+            print("Exception", error)
+            raise error

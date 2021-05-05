@@ -1,13 +1,3 @@
-"""
-REGISTER
-LOGIN
-LOGOUT
-SEND ACTIVATION EMAIL
-ACTIVATE
-PASSWORD RESET REQUEST
-PASSWORD RESET CONFIRMATION
-"""
-
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 
@@ -36,11 +26,11 @@ from ..helpers import (
     create_general_exception_response_dict,
 )
 from ..serializers import (
-    CreateUserSerializer,
     ConfirmResetPasswordSerializer,
+    CreateUserSerializer,
     LogoutSerializer,
-    SendResetPasswordSerializer,
     SendEmailVerificationSerializer,
+    SendResetPasswordSerializer,
 )
 from .jwt_views import CustomTokenObtainPairView
 
@@ -219,84 +209,6 @@ class VerifyEmailView(APIView):
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-
-# class AuthEmailBaseView(APIView):
-#     """ """
-
-#     email_sender = None
-
-#     def post(self, request, *args, **kwargs):
-#         """ """
-#         try:
-#             # TODO  check last sent verification and dont allow multiple email in certain timeframe
-
-#             email = request.data.get("email", False)
-#             if email:
-
-#                 checker = DbExistenceChecker()
-#                 try:
-#                     user_requested = checker.check_return_user_existence(email=email)
-#                 except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
-#                     raise NoneExistenceError(
-#                         email,
-#                         create_400_response_dict(
-#                             400,
-#                             "Non existence",
-#                             f"Account with email {email} credentials does not exist! Check email or sign up using a different email",
-#                         ),
-#                     )
-
-#                 if not user_requested.email_verified:
-#                     email_sender = EmailSender()
-#                     email_sender.send_email_verification_mail(request, user_requested)
-
-#                     return Response(
-#                         create_200_response_dict(
-#                             202,
-#                             "Email Sent",
-#                             f'A new verification email has been sent to email"{email}"!',
-#                         ),
-#                         status=status.HTTP_202_ACCEPTED,
-#                     )
-#                 else:
-#                     raise AlreadyEmailVerifiedError(
-#                         message=create_400_response_dict(
-#                             400,
-#                             "Already verified",
-#                             "`email` already verified.",
-#                         ),
-#                         status=status.HTTP_400_BAD_REQUEST,
-#                     )
-
-#             else:
-#                 raise MissingFieldsError(
-#                     instance=request,
-#                     message=create_400_response_dict(
-#                         status.HTTP_400_BAD_REQUEST,
-#                         "Missing fields",
-#                         "`email` field is mandatory. Please provide email",
-#                     ),
-#                 )
-
-#         except AlreadyEmailVerifiedError as error:
-#             return Response(error.message, status=error.message["status"])
-
-#         except MissingFieldsError as error:
-#             return Response(error.message, status=error.message["status"])
-
-#         except NoneExistenceError as error:
-#             return Response(error.message, status=error.message["status"])
-
-#         except Exception:
-#             return Response(
-#                 create_general_exception_response_dict(
-#                     500,
-#                     "Internal Error",
-#                     f"Could not create account due to an unknown error.",
-#                 ),
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             )
 
 
 class ResendEmailVerificationView(APIView):

@@ -1,5 +1,17 @@
 # Changelogs
 
+## v.0.1.4: Added User API views, logic
+
+1. Added Django REST API for  User Views
+
+   a. User Detail GET
+   b. User Update: Update PATCH, Change Password PATCH, Activate POST, Deactivate PATCH
+   c. User Delete: Delete account DELETE
+
+2. Modified user urls
+
+NOTE: Documentation of API not done
+
 ## v.0.1.3: Added User API views, logic
 
 1. Added Django REST API for  
