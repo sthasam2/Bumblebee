@@ -37,7 +37,6 @@ class CustomBaseError(Error):
         \n\tcause: {self.instance} 
         \n\summary: {self.summary}
         \n\tmessage: {self.message}
-        \n\ttreeback: {self.with_traceback()}
         """
 
     class Meta:
@@ -47,6 +46,22 @@ class CustomBaseError(Error):
 class MissingFieldsError(CustomBaseError):
     """
     Exception raised when fields are missing
+    """
+
+    pass
+
+
+class UnknownModelFieldsError(CustomBaseError):
+    """
+    Exception raised when model fields dont exist
+    """
+
+    pass
+
+
+class PreviousValueMatchingError(CustomBaseError):
+    """
+    Exception raised when model fields dont exist
     """
 
     pass

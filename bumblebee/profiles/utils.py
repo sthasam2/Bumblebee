@@ -1,0 +1,49 @@
+from rest_framework import status
+from bumblebee.core.exceptions import NoneExistenceError, UrlParameterError
+from bumblebee.core.helpers import create_400, RequestFieldsChecker
+from .models import Profile
+
+
+def get_profile_from_url_username_or_raise(**kwargs):
+    """ """
+
+    url_username = kwargs.get("username")
+    if url_username:
+        try:
+            return Profile.objects.get(user__username=url_username)
+
+        except (TypeError, ValueError, OverflowError, Profile.DoesNotExist):
+            raise NoneExistenceError(
+                url_username,
+                create_400(
+                    400,
+                    "Non existence",
+                    f"Account with username {url_username} credentials does not exist!",
+                ),
+            )
+    else:
+        raise UrlParameterError(
+            instance="Url username",
+            message=create_400(
+                status.HTTP_400_BAD_REQUEST,
+                "Url parameter wrong",
+                '"username" must be provided',
+            ),
+        )
+
+
+def check_fields(req_data=None, field_options=None, required_fields=None):
+    """ """
+
+    if required_fields is not None:
+        RequestFieldsChecker().check_required_field_or_raise(req_data, required_fields)
+
+    if field_options is not None:
+        RequestFieldsChecker().check_at_least_one_field_or_raise(
+            req_data, field_options
+        )
+
+    if required_fields is not None and field_options is not None:
+        RequestFieldsChecker().check_extra_fields_or_raise(
+            req_data, field_options, required_fields
+        )

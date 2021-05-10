@@ -1,31 +1,25 @@
 ##############################
 # data manipulation methods
 #############################
-from bumblebee.users.exceptions import ExtraFieldsError, MissingFieldsError
+from bumblebee.core.exceptions import ExtraFieldsError, MissingFieldsError
 
 
-def create_dict(**kwargs):
-    """ """
-    return dict(**kwargs)
-
-
-def create_general_exception_response_dict(
-    status: int, type: str, message: str, verbose=None
-) -> dict:
+def create_500(cause=None, verbose=None) -> dict:
     """
     creates a dictionary with error code, type, message
     """
     return {
-        "status": status,
+        "status": 500,
         "error": {
-            "type": type,
-            "message": message,
+            "cause": cause,
+            "type": "Internal Server Error",
+            "message": "Could not process request due to an internal server error.",
             "verbose": verbose,
         },
     }
 
 
-def create_400_response_dict(status: int, message: str, detail: str) -> dict:
+def create_400(status: int, message: str, detail: str) -> dict:
     """
     creates a dictionary with error code, message, detail
     """
@@ -38,7 +32,7 @@ def create_400_response_dict(status: int, message: str, detail: str) -> dict:
     }
 
 
-def create_200_response_dict(status: int, message: str, detail: str) -> dict:
+def create_200(status: int, message: str, detail: str) -> dict:
     """
     creates a dictionary with success code, message, message
     """
@@ -66,7 +60,7 @@ class RequestFieldsChecker:
 
         if len(included) == 0:
             raise MissingFieldsError(
-                message=create_400_response_dict(
+                message=create_400(
                     400,
                     "Missing Fields",
                     f"No fields from required were provided",
@@ -87,7 +81,7 @@ class RequestFieldsChecker:
 
         if len(extra) != 0:
             raise ExtraFieldsError(
-                message=create_400_response_dict(
+                message=create_400(
                     400,
                     "Extra Fields",
                     f"Extra fields were provided: \n {extra}",
@@ -109,7 +103,7 @@ class RequestFieldsChecker:
         if len(missing) != 0:
             raise MissingFieldsError(
                 missing,
-                create_400_response_dict(
+                create_400(
                     400,
                     "Missing Fields",
                     f"The following required fields are missing:\n {missing}",
@@ -117,3 +111,21 @@ class RequestFieldsChecker:
             )
         else:
             return None
+
+    def check_fields(req_data=None, field_options=None, required_fields=None):
+        """ """
+
+        if required_fields is not None:
+            RequestFieldsChecker().check_required_field_or_raise(
+                req_data, required_fields
+            )
+
+        if field_options is not None:
+            RequestFieldsChecker().check_at_least_one_field_or_raise(
+                req_data, field_options
+            )
+
+        if required_fields is not None and field_options is not None:
+            RequestFieldsChecker().check_extra_fields_or_raise(
+                req_data, field_options, required_fields
+            )

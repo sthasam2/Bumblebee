@@ -2,7 +2,11 @@ from django.contrib.auth.base_user import BaseUserManager
 
 from config.definitions import DEBUG
 
-from .exceptions import NoneExistenceError, PreExistenceError
+from bumblebee.core.exceptions import (
+    NoneExistenceError,
+    PreExistenceError,
+    PreviousValueMatchingError,
+)
 
 
 class CustomUserManager(BaseUserManager):
@@ -171,7 +175,10 @@ class CustomUserManager(BaseUserManager):
                             },
                         },
                     )
-                user_to_update.username = new_username
+                if user_to_update.username != new_username:
+                    user_to_update.username = new_username
+                # else:
+                #     raise PreviousValueMatchingError(instance="username")
 
             if new_email:
                 new_email = self.normalize_email(new_email)
@@ -186,13 +193,22 @@ class CustomUserManager(BaseUserManager):
                             },
                         },
                     )
-                user_to_update.email = new_email
+                if user_to_update.email != new_email:
+                    user_to_update.email = new_email
+                # else:
+                #     raise PreviousValueMatchingError(instance="email")
 
             if new_password:
-                user_to_update.set_password(new_password)
+                if not user_to_update.check_password(new_password):
+                    user_to_update.set_password(new_password)
+                # else:
+                #     raise PreviousValueMatchingError(instance="passsword")
 
             if fields.__contains__("active"):
-                user_to_update.active = new_active
+                if user_to_update.active != new_active:
+                    user_to_update.active = new_active
+                # else:
+                #     raise PreviousValueMatchingError(instance="active")
 
             user_to_update.save()
 
@@ -201,6 +217,19 @@ class CustomUserManager(BaseUserManager):
         except (PreExistenceError, NoneExistenceError) as error:
             print(error.name, error)
             raise error
+
+        except PreviousValueMatchingError as error:
+            print(error.name, error)
+            raise PreviousValueMatchingError(
+                instance=error.instance,
+                message={
+                    "status": 400,
+                    "error": {
+                        "message": "Previous value matching",
+                        "detail": f"Field `{error.instance}` matches the previous credential. Please provide new credentials for update",
+                    },
+                },
+            )
 
         except Exception as error:
             print("Exception", error)

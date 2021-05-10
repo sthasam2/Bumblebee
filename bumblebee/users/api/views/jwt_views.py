@@ -9,7 +9,7 @@ from rest_framework.status import (
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from bumblebee.users.api.helpers import create_400_response_dict
+from bumblebee.core.helpers import create_400
 
 from ..schemas import LoginAcceptedResponseSchema, Response400Schema, Response500Schema
 from ..serializers import CustomTokenObtainPairSerializer
@@ -43,9 +43,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         if not context.data["user_details"]["email_verified"]:
 
             return Response(
-                data=create_400_response_dict(
-                    401, "Access Denied!", "Email not verified!"
-                ),
+                data=create_400(401, "Access Denied!", "Email not verified!"),
                 status=HTTP_401_UNAUTHORIZED,
             )
         else:

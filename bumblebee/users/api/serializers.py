@@ -163,7 +163,12 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["username", "email", "active", "password"]
+        fields = ["username", "email", "active", "password", "current_password"]
+
+    def update_user(self, user_instance, **validated_data):
+        """ """
+
+        return CustomUser.objects.update_user(user_instance.id, **validated_data)
 
 
 class ChangePasswordSerializer(serializers.ModelSerializer):

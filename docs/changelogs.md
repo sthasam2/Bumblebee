@@ -1,5 +1,18 @@
 # Changelogs
 
+## v.0.1.5: Added Profile API views, logic
+
+1. Added Django REST API for  Profile Views
+
+   a. Profile Retrieve: Detail GET (Different for owners, public and private), Summary GET
+   b. Profile Update: Update PATCH, Update Images POST, Change Private POST
+
+2. Added some utlity functions, serializers
+
+3. Bug Fixes, Some settings additions, Structure changes
+
+NOTE: Documentation of API not done
+
 ## v.0.1.4: Added User API views, logic
 
 1. Added Django REST API for  User Views

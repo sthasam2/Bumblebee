@@ -1,24 +1,16 @@
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import (
+    AllowAny,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
-    AllowAny,
 )
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import UpdateAPIView
 
-from bumblebee.users.api.serializers import (
-    UpdateUserSerializer,
-    UserSerializer,
-    ChangePasswordSerializer,
-    DeleteUserSerializer,
-    DeactivateSerializer,
-    ActivateSerializer,
-)
-from bumblebee.users.exceptions import (
+from bumblebee.core.exceptions import (
     ExtraFieldsError,
     MissingFieldsError,
     NoneExistenceError,
@@ -26,16 +18,23 @@ from bumblebee.users.exceptions import (
     UnmatchedFieldsError,
     UrlParameterError,
 )
-from bumblebee.users.models import CustomUser
-from bumblebee.users.permissions import IsOwner, IsPasswordMatching
-from bumblebee.users.utils import DbExistenceChecker
-
-from ..helpers import (
+from bumblebee.core.helpers import (
     RequestFieldsChecker,
-    create_200_response_dict,
-    create_400_response_dict,
-    create_general_exception_response_dict,
+    create_200,
+    create_400,
+    create_500,
 )
+from bumblebee.core.permissions import IsOwner, IsPasswordMatching
+from bumblebee.users.api.serializers import (
+    ActivateSerializer,
+    ChangePasswordSerializer,
+    DeactivateSerializer,
+    DeleteUserSerializer,
+    UpdateUserSerializer,
+    UserSerializer,
+)
+from bumblebee.users.models import CustomUser
+from bumblebee.users.utils import DbExistenceChecker
 
 
 class UserDetailView(APIView):
@@ -81,16 +80,16 @@ class UserDetailView(APIView):
                 except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                     raise NoneExistenceError(
                         url_username,
-                        create_400_response_dict(
+                        create_400(
                             400,
                             "Non existence",
-                            f"Account with username {url_username} credentials does not exist!",
+                            f"Account with username `{url_username}` credentials does not exist!",
                         ),
                     )
             else:
                 raise UrlParameterError(
                     instance=request,
-                    message=create_400_response_dict(
+                    message=create_400(
                         status.HTTP_400_BAD_REQUEST,
                         "Url parameter wrong",
                         '"username" must be provided',
@@ -101,18 +100,15 @@ class UserDetailView(APIView):
             return Response(error.message, status=error.message["status"])
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400_response_dict(
-                    error.status_code, error.default_code, error.default_detail
-                ),
+                create_400(error.status_code, error.default_code, error.default_detail),
                 status=error.status_code,
             )
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not fetch request due to an internal error.",
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not fetch user profile for `{url_username}` due to an internal error.",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -156,10 +152,10 @@ class UpdateUserView(APIView):
                 except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                     raise NoneExistenceError(
                         url_username,
-                        create_400_response_dict(
+                        create_400(
                             400,
                             "Non existence",
-                            f"Account with username {url_username} credentials does not exist!",
+                            f"Account with username `{url_username}` credentials does not exist!",
                         ),
                     )
 
@@ -167,13 +163,15 @@ class UpdateUserView(APIView):
                 # check object permissions
                 self.check_object_permissions(request, user_to_update)
 
-                CustomUser.objects.update_user(user_to_update.id, **data)
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.update_user(user_to_update, **data)
 
                 return Response(
-                    create_200_response_dict(
+                    create_200(
                         status.HTTP_202_ACCEPTED,
                         "User Updated",
-                        f"Account with username {url_username} updated to new credentials!",
+                        f"Account with username `{url_username}` updated to new credentials!",
                     ),
                     status=status.HTTP_202_ACCEPTED,
                 )
@@ -183,7 +181,7 @@ class UpdateUserView(APIView):
             else:
                 raise UrlParameterError(
                     instance=request,
-                    message=create_400_response_dict(
+                    message=create_400(
                         status.HTTP_400_BAD_REQUEST,
                         "Url parameter wrong",
                         '"username" must be provided',
@@ -201,18 +199,15 @@ class UpdateUserView(APIView):
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400_response_dict(
-                    error.status_code, error.default_code, error.default_detail
-                ),
+                create_400(error.status_code, error.default_code, error.default_detail),
                 status=error.status_code,
             )
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not update user credentials due to an unknown error.",
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not update credentials for user `{url_username}` due to an unknown error.",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -255,10 +250,10 @@ class DeleteUserView(APIView):
                     #  send email
 
                     return Response(
-                        create_200_response_dict(
+                        create_200(
                             status.HTTP_202_ACCEPTED,
                             "User Deleted",
-                            f"Account with username {url_username} deleted!",
+                            f"Account with username `{url_username}` deleted!",
                         ),
                         status=status.HTTP_202_ACCEPTED,
                     )
@@ -266,17 +261,17 @@ class DeleteUserView(APIView):
                 except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                     raise NoneExistenceError(
                         url_username,
-                        create_400_response_dict(
+                        create_400(
                             400,
                             "Non existence",
-                            f"Account with username {url_username} credentials does not exist!",
+                            f"Account with username `{url_username}` credentials does not exist!",
                         ),
                     )
 
             else:
                 raise UrlParameterError(
                     instance=request,
-                    message=create_400_response_dict(
+                    message=create_400(
                         status.HTTP_400_BAD_REQUEST,
                         "Url parameter wrong",
                         '"username" must be provided',
@@ -294,18 +289,15 @@ class DeleteUserView(APIView):
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400_response_dict(
-                    error.status_code, error.default_code, error.default_detail
-                ),
+                create_400(error.status_code, error.default_code, error.default_detail),
                 status=error.status_code,
             )
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not delete account due to an unknown error.",
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not delete account of user {url_username} due to an unknown error.",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -372,7 +364,7 @@ class ActivateUserView(APIView):
                     if username_user.id != email_user.id:
                         raise UnmatchedFieldsError(
                             request,
-                            create_400_response_dict(
+                            create_400(
                                 status.HTTP_400_BAD_REQUEST,
                                 "Unmatched fields",
                                 "Provided fields email and username are not associated with same user",
@@ -383,7 +375,7 @@ class ActivateUserView(APIView):
                     CustomUser.objects.update_user(user_to_activate.id, active=True)
 
                     return Response(
-                        create_200_response_dict(
+                        create_200(
                             status.HTTP_202_ACCEPTED,
                             "User Updated",
                             f"{user_to_activate.username} account has been activated!",
@@ -399,7 +391,7 @@ class ActivateUserView(APIView):
             except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                 raise NoneExistenceError(
                     request.data,
-                    create_400_response_dict(
+                    create_400(
                         400,
                         "Non existence",
                         f"Account with given credentials does not exist!",
@@ -417,7 +409,7 @@ class ActivateUserView(APIView):
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400_response_dict(
+                create_400(
                     error.status_code,
                     error.get_codes(),
                     error.get_full_details().get("message"),
@@ -427,10 +419,9 @@ class ActivateUserView(APIView):
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not update user credentials due to an unknown error.",
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not activate user {user_to_activate.username} due to an unknown error.",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

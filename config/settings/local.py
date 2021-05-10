@@ -117,8 +117,10 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 STATIC_ROOT = BASE_DIR / "static_root"
+
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "/static/"
 
@@ -152,7 +154,7 @@ EMAIL_HOST_PASSWORD = get_environ_variable("EMAIL_PASSWORD")
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=2),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,

@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from bumblebee.users.exceptions import (
+from bumblebee.core.exceptions import (
     AlreadyEmailVerifiedError,
     ExpiredError,
     MissingFieldsError,
@@ -20,10 +20,10 @@ from bumblebee.users.exceptions import (
 from bumblebee.users.models import CustomUser, EmailToken
 from bumblebee.users.utils import DbExistenceChecker, EmailSender
 
-from ..helpers import (
-    create_200_response_dict,
-    create_400_response_dict,
-    create_general_exception_response_dict,
+from bumblebee.core.helpers import (
+    create_200,
+    create_400,
+    create_500,
 )
 from ..serializers import (
     ConfirmResetPasswordSerializer,
@@ -63,22 +63,20 @@ class RegisterView(CreateAPIView):
 
             if email and username and password:
 
-                checker = DbExistenceChecker()
-
-                if checker.check_email_existence(email):
+                if DbExistenceChecker().check_email_existence(email):
                     raise PreExistenceError(
                         email,
-                        create_400_response_dict(
+                        create_400(
                             status.HTTP_400_BAD_REQUEST,
                             "Already exists",
                             f'User with email "{email}" already exists. Try a different email',
                         ),
                     )
 
-                if checker.check_username_existence(username):
+                if DbExistenceChecker().check_username_existence(username):
                     raise PreExistenceError(
                         username,
-                        create_400_response_dict(
+                        create_400(
                             status.HTTP_400_BAD_REQUEST,
                             "Already exists",
                             f'User with username "{username}" already exists. Try a different username',
@@ -95,7 +93,7 @@ class RegisterView(CreateAPIView):
                 email_sender.send_email_verification_mail(request, new_user)
 
                 return Response(
-                    create_200_response_dict(
+                    create_200(
                         201,
                         "Created",
                         f'A user account with email"{email}" and username "{username}" created!',
@@ -105,7 +103,7 @@ class RegisterView(CreateAPIView):
             else:
                 raise MissingFieldsError(
                     instance=request,
-                    message=create_400_response_dict(
+                    message=create_400(
                         status.HTTP_400_BAD_REQUEST,
                         "Missing Fields",
                         "Either of the required fields email, username, and/or password is missing.",
@@ -117,10 +115,8 @@ class RegisterView(CreateAPIView):
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not create account due to an unknown error.",
+                create_500(
+                    verbose=f"Could not create account due to an unknown error."
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -141,14 +137,15 @@ class VerifyEmailView(APIView):
             token = kwargs["token"]
 
             # check token and user existence
-            checker = DbExistenceChecker()
 
             try:
-                user_to_verify = checker.check_return_user_existence(pk=uid)
+                user_to_verify = DbExistenceChecker().check_return_user_existence(
+                    pk=uid
+                )
             except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                 raise NoneExistenceError(
                     "User",
-                    create_400_response_dict(
+                    create_400(
                         400,
                         "Non existence",
                         "User associated to token does not exist",
@@ -156,11 +153,13 @@ class VerifyEmailView(APIView):
                 )
 
             try:
-                email_token = checker.check_return_token_existence(token=token)
+                email_token = DbExistenceChecker().check_return_token_existence(
+                    token=token
+                )
             except (TypeError, ValueError, OverflowError, EmailToken.DoesNotExist):
                 raise NoneExistenceError(
                     "Email Token",
-                    create_400_response_dict(
+                    create_400(
                         400,
                         "Non existence",
                         "Token does not exist",
@@ -171,16 +170,14 @@ class VerifyEmailView(APIView):
             if email_token.check_expired:
                 raise ExpiredError(
                     "Email Token",
-                    create_400_response_dict(
-                        400, "Expired", "Email Token already expired!"
-                    ),
+                    create_400(400, "Expired", "Email Token already expired!"),
                 )
 
             # check token user and uid match
             if email_token.user.id != user_to_verify.id:
                 raise UnmatchedFieldsError(
                     "User",
-                    create_400_response_dict(
+                    create_400(
                         400, "Not matching", "Url user and Token user don't match!"
                     ),
                 )
@@ -189,7 +186,7 @@ class VerifyEmailView(APIView):
             user_to_verify.save()
 
             return Response(
-                create_200_response_dict(
+                create_200(
                     200,
                     "Email verified",
                     "Email has been verified. Now you can login to your account",
@@ -201,11 +198,9 @@ class VerifyEmailView(APIView):
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not verify due to an unknown error.",
-                    error.args[0],
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not verify due to an unknown error.",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -238,13 +233,14 @@ class ResendEmailVerificationView(APIView):
             email = request.data.get("email", False)
             if email:
 
-                checker = DbExistenceChecker()
                 try:
-                    user_requested = checker.check_return_user_existence(email=email)
+                    user_requested = DbExistenceChecker().check_return_user_existence(
+                        email=email
+                    )
                 except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                     raise NoneExistenceError(
                         email,
-                        create_400_response_dict(
+                        create_400(
                             400,
                             "Non existence",
                             f"Account with email {email} credentials does not exist! Check email or sign up using a different email",
@@ -256,7 +252,7 @@ class ResendEmailVerificationView(APIView):
                     email_sender.send_email_verification_mail(request, user_requested)
 
                     return Response(
-                        create_200_response_dict(
+                        create_200(
                             202,
                             "Email Sent",
                             f'A new verification email has been sent to email"{email}"!',
@@ -265,7 +261,7 @@ class ResendEmailVerificationView(APIView):
                     )
                 else:
                     raise AlreadyEmailVerifiedError(
-                        message=create_400_response_dict(
+                        message=create_400(
                             400,
                             "Already verified",
                             "`email` already verified.",
@@ -275,7 +271,7 @@ class ResendEmailVerificationView(APIView):
             else:
                 raise MissingFieldsError(
                     instance=request,
-                    message=create_400_response_dict(
+                    message=create_400(
                         status.HTTP_400_BAD_REQUEST,
                         "Missing fields",
                         "`email` field is mandatory. Please provide email",
@@ -291,11 +287,9 @@ class ResendEmailVerificationView(APIView):
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not send verification email due to an unknown error.",
-                    error.args[0],
+                create_500(
+                    verbose=f"Could not send verification email due to an unknown error.",
+                    cause=error.args[0] or None,
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -322,12 +316,12 @@ class LogoutView(APIView):
             token.blacklist()
 
             return Response(
-                create_200_response_dict(202, "Logged out", "Sucessfully logged out"),
+                create_200(202, "Logged out", "Sucessfully logged out"),
                 status=status.HTTP_202_ACCEPTED,
             )
         except Exception as e:
             return Response(
-                create_400_response_dict(400, "Error occuored", e.args[0]),
+                create_400(400, "Error occuored", e.args[0]),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -346,14 +340,15 @@ class SendResetPasswordView(APIView):
             email = request.data.get("email", False)
             if email:
 
-                checker = DbExistenceChecker()
                 try:
-                    user_requested = checker.check_return_user_existence(email=email)
+                    user_requested = DbExistenceChecker().check_return_user_existence(
+                        email=email
+                    )
 
                 except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                     raise NoneExistenceError(
                         email,
-                        create_400_response_dict(
+                        create_400(
                             400,
                             "Non existence",
                             f"Account with email {email} credentials does not exist!",
@@ -364,7 +359,7 @@ class SendResetPasswordView(APIView):
                 email_sender.send_password_reset_email(request, user_requested)
 
                 return Response(
-                    create_200_response_dict(
+                    create_200(
                         202,
                         "Email Sent",
                         f'A new password email has been sent to email"{email}"!',
@@ -374,7 +369,7 @@ class SendResetPasswordView(APIView):
             else:
                 raise MissingFieldsError(
                     instance=request,
-                    message=create_400_response_dict(
+                    message=create_400(
                         status.HTTP_400_BAD_REQUEST,
                         "Missing fields",
                         "`email` field is mandatory. Please provide email",
@@ -390,11 +385,9 @@ class SendResetPasswordView(APIView):
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not send reset account password email due to an unknown error.",
-                    error.args[0],
+                create_500(
+                    verbose=f"Could not send reset account password email due to an unknown error.",
+                    cause=error.args[0] or None,
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -417,25 +410,28 @@ class ConfirmResetPasswordView(APIView):
             password = request.data.get("password", False)
 
             if email and token and password:
-                checker = DbExistenceChecker()
 
                 try:
-                    user_to_reset = checker.check_return_user_existence(email=email)
+                    user_to_reset = DbExistenceChecker().check_return_user_existence(
+                        email=email
+                    )
                 except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
                     raise NoneExistenceError(
                         "User",
-                        create_400_response_dict(
+                        create_400(
                             400,
                             "Non existence",
                             "User associated to token does not exist",
                         ),
                     )
                 try:
-                    email_token = checker.check_return_token_existence(token=token)
+                    email_token = DbExistenceChecker().check_return_token_existence(
+                        token=token
+                    )
                 except (TypeError, ValueError, OverflowError, EmailToken.DoesNotExist):
                     raise NoneExistenceError(
                         "Email Token",
-                        create_400_response_dict(
+                        create_400(
                             400,
                             "Non existence",
                             "Token does not exist",
@@ -446,16 +442,14 @@ class ConfirmResetPasswordView(APIView):
                 if email_token.check_expired:
                     raise ExpiredError(
                         "Email Token",
-                        create_400_response_dict(
-                            400, "Expired", "Email Token already expired!"
-                        ),
+                        create_400(400, "Expired", "Email Token already expired!"),
                     )
 
                 # check token user and uid match
                 if email_token.user.id != user_to_reset.id:
                     raise UnmatchedFieldsError(
                         "User",
-                        create_400_response_dict(
+                        create_400(
                             400, "Not matching", "Url user and Token user don't match!"
                         ),
                     )
@@ -464,7 +458,7 @@ class ConfirmResetPasswordView(APIView):
                 user_to_reset.save()
 
                 return Response(
-                    create_200_response_dict(
+                    create_200(
                         200,
                         "Password Resetted!",
                         "Password has been resetted. Now you can login to your account",
@@ -473,7 +467,7 @@ class ConfirmResetPasswordView(APIView):
             else:
                 raise MissingFieldsError(
                     instance=request,
-                    message=create_400_response_dict(
+                    message=create_400(
                         status.HTTP_400_BAD_REQUEST,
                         "Missing fields",
                         "Either of the required fileds: email, password, and/or token missing",
@@ -484,11 +478,9 @@ class ConfirmResetPasswordView(APIView):
 
         except Exception as error:
             return Response(
-                create_general_exception_response_dict(
-                    500,
-                    "Internal Error",
-                    f"Could not reset password due to an unknown error.",
-                    error.args[0],
+                create_500(
+                    verbose=f"Could not reset password due to an unknown error.",
+                    cause=error.args[0] or None,
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

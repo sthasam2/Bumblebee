@@ -23,7 +23,9 @@ class UserAdminCreationForm(forms.ModelForm):
         if not password2:
             raise forms.ValidationError("Confirmation Password not found")
         if password1 != password2:
-            raise forms.ValidationError("Passwords do not match")
+            raise forms.ValidationError(
+                "Passwords do not match. Please check passwords and try again"
+            )
 
         return password2
 

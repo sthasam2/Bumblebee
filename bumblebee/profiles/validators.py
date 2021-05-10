@@ -6,7 +6,7 @@ from config.settings.local import TIME_ZONE
 
 
 def validate_date_lt_today(value):
-    """"""
+    """ """
     now_naive = dt.datetime.now()
     now_aware = pytz.timezone(TIME_ZONE).localize(now_naive)
 

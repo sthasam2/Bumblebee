@@ -19,7 +19,7 @@ def post_save_create_save_profile_and_activity(sender, instance, created, **kwar
             )
 
         # create profile
-        Profile.objects.create(user=instance)
+        profile = Profile.objects.create(user=instance)
 
         _create_activity(
             user=instance,
@@ -32,7 +32,7 @@ def post_save_create_save_profile_and_activity(sender, instance, created, **kwar
             user=instance,
             action=UserActivity.Actions.CREATE,
             target_content=ContentType.objects.get_for_model(Profile),
-            target_id=instance.profile.id,
+            target_id=profile.id,
         )
 
 
