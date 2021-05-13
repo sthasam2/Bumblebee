@@ -9,6 +9,8 @@ python = "^3.8"
 Django = "^3.2"
 djangorestframework-simplejwt = "^4.6.0"
 djangorestframework = "^3.12.4"
+psycopg2 = "^2.8.6"
+Pillow = "^8.2.0"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.8.0"
