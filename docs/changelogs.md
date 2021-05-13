@@ -1,5 +1,7 @@
 # Changelogs
 
+## v.0.1.5.1: Added Dotenv configuration, changed some logic
+
 ## v.0.1.5: Added Profile API views, logic
 
 1. Added Django REST API for  Profile Views
