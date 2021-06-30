@@ -5,18 +5,17 @@ from django.dispatch import receiver
 
 from bumblebee.activities.models import UserActivity
 from bumblebee.activities.utils import _create_activity
-from bumblebee.users.models import CustomUser
-from .models import Buzz, Rebuzz, BuzzInteractions
+from .models import Buzz, Rebuzz, BuzzInteractions, RebuzzInteractions
 
 
 @receiver(post_save, sender=Buzz)
 def post_save_create_interaction_activity(sender, instance, created, **kwargs):
-    """"""
+    """ """
 
     if created:
         BuzzInteractions.objects.create(buzz=instance)
         _create_activity(
-            instance.user,
+            instance.author,
             UserActivity.Actions.POST,
             ContentType.objects.get_for_model(instance),
             instance.id,
@@ -25,12 +24,12 @@ def post_save_create_interaction_activity(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Rebuzz)
 def post_save_create_interaction_activity(sender, instance, created, **kwargs):
-    """"""
+    """ """
 
     if created:
-        BuzzInteractions.objects.create(buzz=instance)
+        RebuzzInteractions.objects.create(rebuzz=instance)
         _create_activity(
-            instance.user,
+            instance.author,
             UserActivity.Actions.POST,
             ContentType.objects.get_for_model(instance),
             instance.id,
