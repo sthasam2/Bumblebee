@@ -1,7 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
-from rest_framework.serializers import Serializer
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_401_UNAUTHORIZED,
@@ -13,6 +12,10 @@ from bumblebee.core.helpers import create_400
 
 from ..schemas import LoginAcceptedResponseSchema, Response400Schema, Response500Schema
 from ..serializers import CustomTokenObtainPairSerializer
+
+##################################
+##          RETRIEVE
+##################################
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

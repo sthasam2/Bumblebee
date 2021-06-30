@@ -195,6 +195,7 @@ class CustomUserManager(BaseUserManager):
                     )
                 if user_to_update.email != new_email:
                     user_to_update.email = new_email
+                    user_to_update.email_verified = False
                 # else:
                 #     raise PreviousValueMatchingError(instance="email")
 

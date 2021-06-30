@@ -19,7 +19,9 @@ class Profile(models.Model):
     avatar = models.ImageField(default="default.png", upload_to="avatar/")
     cover = models.ImageField(default="default.png", upload_to="cover/")
 
-    bio = models.CharField(max_length=200, help_text="What's on your mind?")
+    bio = models.CharField(
+        max_length=200, help_text="What's on your mind?", null=True, blank=True
+    )
     name = models.CharField(
         max_length=747,
         unique=False,
@@ -39,6 +41,8 @@ class Profile(models.Model):
     location = models.CharField(
         max_length=200,
         help_text="User Location. Street, Municipality/VDC, State, Country",
+        null=True,
+        blank=True,
     )
 
     phone_validator = RegexValidator(

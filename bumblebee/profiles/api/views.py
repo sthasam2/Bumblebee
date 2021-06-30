@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from bumblebee.core.exceptions import (
+    ExtraFieldsError,
     MissingFieldsError,
     NoneExistenceError,
     UrlParameterError,
@@ -66,7 +67,11 @@ class ProfileDetailView(APIView):
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400(error.status_code, error.default_code, error.default_detail),
+                create_400(
+                    error.status_code,
+                    error.get_codes(),
+                    error.get_full_details().get("message"),
+                ),
                 status=error.status_code,
             )
 
@@ -100,7 +105,11 @@ class ProfileSummaryView(APIView):
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400(error.status_code, error.default_code, error.default_detail),
+                create_400(
+                    error.status_code,
+                    error.get_codes(),
+                    error.get_full_details().get("message"),
+                ),
                 status=error.status_code,
             )
 
@@ -115,7 +124,23 @@ class ProfileSummaryView(APIView):
 
 
 class UpdateProfileView(APIView):
-    """ """
+    """
+    Update User Profile
+
+    Method
+    ---
+    patch:
+
+    - field_options = [
+        "bio",
+        "name",
+        "nickname",
+        "dob" / ISO 8601: `2013-01-29T12:34:56.000000Z` /,
+        "location",
+        "phone",
+    ]
+    - required_fields = ["current_password"]
+    """
 
     serializer_class = UpdateProfileSerializer
     permission_classes = [
@@ -156,12 +181,21 @@ class UpdateProfileView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        except (UrlParameterError, NoneExistenceError) as error:
+        except (
+            UrlParameterError,
+            NoneExistenceError,
+            ExtraFieldsError,
+            MissingFieldsError,
+        ) as error:
             return Response(error.message, status=error.message.get("status"))
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400(error.status_code, error.default_code, error.default_detail),
+                create_400(
+                    error.status_code,
+                    error.get_codes(),
+                    error.get_full_details().get("message"),
+                ),
                 status=error.status_code,
             )
 
@@ -176,7 +210,15 @@ class UpdateProfileView(APIView):
 
 
 class ChangePrivateProfileView(APIView):
-    """ """
+    """
+    Change profile `private` field for privacy
+
+    Method
+    ---
+    post:
+    - required_fields = ["current_password"]
+    - field_options = None
+    """
 
     serializer_class = ChangePrivateProfileSerializer
     permission_classes = [
@@ -210,12 +252,21 @@ class ChangePrivateProfileView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        except (UrlParameterError, NoneExistenceError) as error:
+        except (
+            UrlParameterError,
+            NoneExistenceError,
+            MissingFieldsError,
+            ExtraFieldsError,
+        ) as error:
             return Response(error.message, status=error.message.get("status"))
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400(error.status_code, error.default_code, error.default_detail),
+                create_400(
+                    error.status_code,
+                    error.get_codes(),
+                    error.get_full_details().get("message"),
+                ),
                 status=error.status_code,
             )
 
@@ -230,7 +281,15 @@ class ChangePrivateProfileView(APIView):
 
 
 class ProfileImageUploadView(APIView):
-    """ """
+    """
+    Upload profile images
+
+    Method
+    ---
+    post:
+    - required_fields = None
+    - field_options = ["avatar", "cover"]
+    """
 
     serializer_class = ProfileImagesSerializer
     permission_classes = [
@@ -269,13 +328,18 @@ class ProfileImageUploadView(APIView):
 
             serializer = self.serializer_class(data=data)
             serializer.is_valid(raise_exception=True)
-            serializer.update(profile_instance, serializer.validated_data)
+            updated_user = serializer.update(
+                profile_instance, serializer.validated_data
+            )
 
             return Response(
                 create_200(
                     status.HTTP_200_OK,
                     "Profile Updated",
-                    f"Profile of user `{kwargs.get('username')}` has turned privacy to",
+                    f"""Profile picture of user `{kwargs.get('username')}` updated. 
+                    Now: 
+                    `avatar={updated_user.avatar.path}`, 
+                    `cover={updated_user.cover.path}`""",
                 ),
                 status=status.HTTP_200_OK,
             )
@@ -285,7 +349,11 @@ class ProfileImageUploadView(APIView):
 
         except (PermissionDenied, NotAuthenticated) as error:
             return Response(
-                create_400(error.status_code, error.default_code, error.default_detail),
+                create_400(
+                    error.status_code,
+                    error.get_codes(),
+                    error.get_full_details().get("message"),
+                ),
                 status=error.status_code,
             )
 

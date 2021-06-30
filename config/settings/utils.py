@@ -14,10 +14,10 @@ def get_environ_variable(var_name: str) -> str:
     """
     try:
         if config.get(var_name):
-            print("dotenv")
+            print("dotenv", var_name)
             return config.get(var_name)
         elif os.environ[var_name]:
-            print("environ")
+            print("environ", var_name)
             return os.environ[var_name]
         else:
             raise KeyError

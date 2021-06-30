@@ -112,7 +112,7 @@ class RequestFieldsChecker:
         else:
             return None
 
-    def check_fields(req_data=None, field_options=None, required_fields=None):
+    def check_fields(self, req_data=None, field_options=None, required_fields=None):
         """ """
 
         if required_fields is not None:

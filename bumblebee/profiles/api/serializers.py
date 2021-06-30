@@ -115,6 +115,7 @@ class ProfilePrivateSerializer(serializers.Serializer):
     avatar = serializers.ImageField()
     cover = serializers.ImageField()
     nickname = serializers.CharField()
+    private = serializers.BooleanField()
 
     class Meta:
         model = Profile
@@ -125,6 +126,7 @@ class ProfilePrivateSerializer(serializers.Serializer):
             "avatar",
             "cover",
             "nickname",
+            "private",
         ]
 
 

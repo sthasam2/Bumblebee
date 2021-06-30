@@ -1,5 +1,9 @@
 from rest_framework import status
-from bumblebee.core.exceptions import NoneExistenceError, UrlParameterError
+from bumblebee.core.exceptions import (
+    MissingFieldsError,
+    NoneExistenceError,
+    UrlParameterError,
+)
 from bumblebee.core.helpers import create_400, RequestFieldsChecker
 from .models import Profile
 
@@ -32,9 +36,18 @@ def get_profile_from_url_username_or_raise(**kwargs):
         )
 
 
-def check_fields(req_data=None, field_options=None, required_fields=None):
+def check_fields(req_data, field_options=None, required_fields=None):
     """ """
 
+    if req_data.__len__() == 0:
+        raise MissingFieldsError(
+            "No fields provided",
+            create_400(
+                400,
+                "Missing Fields",
+                f"No fields were provided",
+            ),
+        )
     if required_fields is not None:
         RequestFieldsChecker().check_required_field_or_raise(req_data, required_fields)
 

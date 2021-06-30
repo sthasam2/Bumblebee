@@ -1,5 +1,11 @@
 # Changelogs
 
+## v.0.1.6: Modifications, Bug Fixes, additions
+
+1. Modifications, Bug Fixes for User, Profile
+2. Added Requirements.txt
+3. Added templates for heroku, elephant (Not customized)
+
 ## v.0.1.5.1: Added Dotenv configuration, changed some logic
 
 ## v.0.1.5: Added Profile API views, logic

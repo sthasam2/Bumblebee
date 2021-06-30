@@ -154,6 +154,21 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     Serializers for CustomUser model
     """
 
+    username = serializers.CharField(
+        max_length=150,
+        required=False,
+        help_text="Username. example: sam_smith",
+        style={"input_type": "text", "placeholder": "Username"},
+    )
+    email = serializers.EmailField(
+        max_length=150,
+        required=False,
+        help_text="Email address. example: example@example.domain",
+        style={"input_type": "email", "placeholder": "Email"},
+    )
+    active = serializers.BooleanField(
+        required=False, help_text="Activate/Deactivate account"
+    )
     current_password = serializers.CharField(
         write_only=True,
         required=True,
@@ -163,7 +178,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["username", "email", "active", "password", "current_password"]
+        fields = ["username", "email", "active", "current_password"]
 
     def update_user(self, user_instance, **validated_data):
         """ """
@@ -191,6 +206,11 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ["current_password", "password"]
 
+    def update_user(self, user_instance, **validated_data):
+        """ """
+
+        return CustomUser.objects.update_user(user_instance.id, **validated_data)
+
 
 class DeactivateSerializer(serializers.ModelSerializer):
     """ """
@@ -201,7 +221,7 @@ class DeactivateSerializer(serializers.ModelSerializer):
         help_text="Current password ",
         style={"input_type": "password", "placeholder": "Current Password"},
     )
-    active = serializers.CharField(
+    active = serializers.BooleanField(
         write_only=True,
         required=True,
         help_text="Activate or Decativate the account. True for activate, False for Deactivate",
@@ -211,6 +231,11 @@ class DeactivateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ["active", "current_password"]
+
+    def update_user(self, user_instance, **validated_data):
+        """ """
+
+        return CustomUser.objects.update_user(user_instance.id, **validated_data)
 
 
 class ActivateSerializer(serializers.Serializer):

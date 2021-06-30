@@ -43,6 +43,12 @@ class CustomBaseError(Error):
         abstract = True
 
 
+class RequestBodyError(CustomBaseError):
+    """
+    Exception raise when request body doesn't have fields
+    """
+
+
 class MissingFieldsError(CustomBaseError):
     """
     Exception raised when fields are missing

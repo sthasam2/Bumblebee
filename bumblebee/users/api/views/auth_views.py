@@ -1,6 +1,5 @@
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
-
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
@@ -17,14 +16,10 @@ from bumblebee.core.exceptions import (
     PreExistenceError,
     UnmatchedFieldsError,
 )
+from bumblebee.core.helpers import create_200, create_400, create_500
 from bumblebee.users.models import CustomUser, EmailToken
 from bumblebee.users.utils import DbExistenceChecker, EmailSender
 
-from bumblebee.core.helpers import (
-    create_200,
-    create_400,
-    create_500,
-)
 from ..serializers import (
     ConfirmResetPasswordSerializer,
     CreateUserSerializer,
@@ -34,10 +29,19 @@ from ..serializers import (
 )
 from .jwt_views import CustomTokenObtainPairView
 
+##################################
+##          CREATE
+##################################
+
 
 class RegisterView(CreateAPIView):
     """
     General API View for registering users
+
+    Methods:
+    @GET - Shows simple message
+
+    @POST - Registers a user. Request body => {"email": ,"username": ,"password": }
     """
 
     permission_classes = [AllowAny]
@@ -96,7 +100,7 @@ class RegisterView(CreateAPIView):
                     create_200(
                         201,
                         "Created",
-                        f'A user account with email"{email}" and username "{username}" created!',
+                        f"A user account with email `{email}` and username `{username}` created!",
                     ),
                     status=status.HTTP_201_CREATED,
                 )
@@ -122,88 +126,9 @@ class RegisterView(CreateAPIView):
             )
 
 
-class VerifyEmailView(APIView):
-    """ """
-
-    permission_classes = [AllowAny]
-
-    def get(self, request, *args, **kwargs):
-        """
-        GET method for email activation
-        """
-        try:
-            # get token and username
-            uid = force_text(urlsafe_base64_decode(kwargs["uidb64"]))
-            token = kwargs["token"]
-
-            # check token and user existence
-
-            try:
-                user_to_verify = DbExistenceChecker().check_return_user_existence(
-                    pk=uid
-                )
-            except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
-                raise NoneExistenceError(
-                    "User",
-                    create_400(
-                        400,
-                        "Non existence",
-                        "User associated to token does not exist",
-                    ),
-                )
-
-            try:
-                email_token = DbExistenceChecker().check_return_token_existence(
-                    token=token
-                )
-            except (TypeError, ValueError, OverflowError, EmailToken.DoesNotExist):
-                raise NoneExistenceError(
-                    "Email Token",
-                    create_400(
-                        400,
-                        "Non existence",
-                        "Token does not exist",
-                    ),
-                )
-
-            # check expired
-            if email_token.check_expired:
-                raise ExpiredError(
-                    "Email Token",
-                    create_400(400, "Expired", "Email Token already expired!"),
-                )
-
-            # check token user and uid match
-            if email_token.user.id != user_to_verify.id:
-                raise UnmatchedFieldsError(
-                    "User",
-                    create_400(
-                        400, "Not matching", "Url user and Token user don't match!"
-                    ),
-                )
-
-            user_to_verify.email_verified = True
-            user_to_verify.save()
-
-            return Response(
-                create_200(
-                    200,
-                    "Email verified",
-                    "Email has been verified. Now you can login to your account",
-                )
-            )
-
-        except (NoneExistenceError, ExpiredError, UnmatchedFieldsError) as error:
-            return Response(error.message, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as error:
-            return Response(
-                create_500(
-                    cause=error.args[0] or None,
-                    verbose=f"Could not verify due to an unknown error.",
-                ),
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+##################################
+##          RETRIEVE
+##################################
 
 
 class ResendEmailVerificationView(APIView):
@@ -311,14 +236,28 @@ class LogoutView(APIView):
         """ """
 
         try:
-            refresh_token = request.data["refresh_token"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
+            refresh_token = request.data.get("refresh")
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
 
-            return Response(
-                create_200(202, "Logged out", "Sucessfully logged out"),
-                status=status.HTTP_202_ACCEPTED,
-            )
+                return Response(
+                    create_200(202, "Logged out", "Sucessfully logged out"),
+                    status=status.HTTP_202_ACCEPTED,
+                )
+            else:
+                raise MissingFieldsError(
+                    "refresh token",
+                    create_400(
+                        400,
+                        "Missing Fields",
+                        "`refresh` must be provided with refresh token",
+                    ),
+                )
+
+        except MissingFieldsError as error:
+            return Response(error.message, status=error.message.get("status"))
+
         except Exception as e:
             return Response(
                 create_400(400, "Error occuored", e.args[0]),
@@ -393,6 +332,95 @@ class SendResetPasswordView(APIView):
             )
 
 
+##################################
+##          UPDATE
+##################################
+
+
+class VerifyEmailView(APIView):
+    """ """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        """
+        GET method for email activation
+        """
+        try:
+            # get token and username
+            uid = force_text(urlsafe_base64_decode(kwargs["uidb64"]))
+            token = kwargs["token"]
+
+            # check token and user existence
+
+            try:
+                user_to_verify = DbExistenceChecker().check_return_user_existence(
+                    pk=uid
+                )
+            except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+                raise NoneExistenceError(
+                    "User",
+                    create_400(
+                        400,
+                        "Non existence",
+                        "User associated to token does not exist",
+                    ),
+                )
+
+            try:
+                email_token = DbExistenceChecker().check_return_token_existence(
+                    token=token
+                )
+            except (TypeError, ValueError, OverflowError, EmailToken.DoesNotExist):
+                raise NoneExistenceError(
+                    "Email Token",
+                    create_400(
+                        400,
+                        "Non existence",
+                        "Token does not exist",
+                    ),
+                )
+
+            # check expired
+            if email_token.check_expired:
+                raise ExpiredError(
+                    "Email Token",
+                    create_400(400, "Expired", "Email Token already expired!"),
+                )
+
+            # check token user and uid match
+            if email_token.user.id != user_to_verify.id:
+                raise UnmatchedFieldsError(
+                    "User",
+                    create_400(
+                        400, "Not matching", "Url user and Token user don't match!"
+                    ),
+                )
+
+            user_to_verify.email_verified = True
+            user_to_verify.save()
+
+            return Response(
+                create_200(
+                    200,
+                    "Email verified",
+                    "Email has been verified. Now you can login to your account",
+                )
+            )
+
+        except (NoneExistenceError, ExpiredError, UnmatchedFieldsError) as error:
+            return Response(error.message, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as error:
+            return Response(
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not verify due to an unknown error.",
+                ),
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 class ConfirmResetPasswordView(APIView):
     """ """
 
@@ -442,7 +470,9 @@ class ConfirmResetPasswordView(APIView):
                 if email_token.check_expired:
                     raise ExpiredError(
                         "Email Token",
-                        create_400(400, "Expired", "Email Token already expired!"),
+                        create_400(
+                            400, "Expired", "Email Token already expired or used!"
+                        ),
                     )
 
                 # check token user and uid match
@@ -456,6 +486,9 @@ class ConfirmResetPasswordView(APIView):
 
                 user_to_reset.set_password(password)
                 user_to_reset.save()
+
+                email_token.expired = True
+                email_token.save()
 
                 return Response(
                     create_200(
