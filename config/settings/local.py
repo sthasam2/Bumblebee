@@ -39,6 +39,7 @@ LOCAL_APPS = [
     "bumblebee.buzzes.apps.BuzzesConfig",
     "bumblebee.core.apps.CoreConfig",
     "bumblebee.comments.apps.CommentsConfig",
+    "bumblebee.connections.apps.ConnectionsConfig",
     "bumblebee.notifications.apps.NotificationsConfig",
     "bumblebee.profiles.apps.ProfilesConfig",
     "bumblebee.users.apps.UsersConfig",

@@ -11,12 +11,14 @@ from .models import Comment, CommentInteractions
 
 @receiver(post_save, sender=Comment)
 def post_save_create_interaction_activity(sender, instance, created, **kwargs):
-    """"""
+    """ """
+
+    print("post save signal @comment")
 
     if created:
-        CommentInteractions.object.create(buzz=instance)
+        CommentInteractions.objects.create(comment=instance)
         _create_activity(
-            instance.user,
+            instance.commenter,
             UserActivity.Actions.COMMENT,
             ContentType.objects.get_for_model(instance),
             instance.id,

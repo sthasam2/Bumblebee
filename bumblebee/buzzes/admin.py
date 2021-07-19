@@ -1,7 +1,14 @@
 from django.contrib import admin
 
 from .forms import BuzzAdminCreationForm, BuzzAdminForm
-from .models import Buzz, BuzzImage, BuzzInteractions, Rebuzz
+from .models import (
+    Buzz,
+    BuzzImage,
+    BuzzInteractions,
+    Rebuzz,
+    RebuzzInteractions,
+    RebuzzImage,
+)
 
 
 class BuzzAdmin(admin.ModelAdmin):
@@ -17,3 +24,5 @@ admin.site.register(Buzz, BuzzAdmin)
 admin.site.register(BuzzInteractions)
 admin.site.register(BuzzImage)
 admin.site.register(Rebuzz)
+admin.site.register(RebuzzInteractions)
+admin.site.register(RebuzzImage)

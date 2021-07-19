@@ -6,6 +6,7 @@ from bumblebee.activities.models import UserActivity
 from bumblebee.activities.utils import _create_activity
 from bumblebee.profiles.models import Profile
 from config.definitions import DEBUG
+from bumblebee.connections.models import Blocked, Follower, Following, Muted
 
 from .models import CustomUser
 
@@ -20,6 +21,10 @@ def post_save_create_save_profile_and_activity(sender, instance, created, **kwar
 
         # create profile
         profile = Profile.objects.create(user=instance)
+        follower = Follower.objects.create(user=instance)
+        following = Following.objects.create(user=instance)
+        muted = Muted.objects.create(user=instance)
+        blocked = Blocked.objects.create(user=instance)
 
         _create_activity(
             user=instance,

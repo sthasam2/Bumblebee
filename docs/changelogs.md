@@ -1,5 +1,23 @@
 # Changelogs
 
+## v.0.1.9: Added Connection System
+
+1. Added Follow, Mute, Block system API Views
+2. Bug Fixes, Modifications
+3. Beta: Not Tested
+
+## v.0.1.8: Added Comment System
+
+1. Added Comment system API Views
+2. Bug Fixes, Modifications
+3. Beta: Not Tested
+
+## v.0.1.7: Added Buzz, Rebuzz System
+
+1. Added Buzz, Rebuzz system API Views
+2. Bug Fixes, Modifications
+3. Beta: Rebuzz (Not Tested)
+
 ## v.0.1.6: Modifications, Bug Fixes, additions
 
 1. Modifications, Bug Fixes for User, Profile

@@ -112,7 +112,6 @@ class UserBuzzListView(APIView):
 class BuzzListView(APIView):
     """ """
 
-    # TODO: Fix user profile private stuff
     permission_classes = [AllowAny]
 
     def get_buzzes(self, *args, **kwargs):
@@ -174,7 +173,7 @@ class BuzzListView(APIView):
             return Response(
                 create_500(
                     cause=error.args[0] or None,
-                    verbose=f"Could not get details for `{kwargs.get('username')}` due to an unknown error",
+                    verbose=f"Could not get buzzes of list due to an unknown error",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

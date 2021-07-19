@@ -4,12 +4,18 @@ from rest_framework.permissions import BasePermission
 from bumblebee.users.models import CustomUser
 from bumblebee.profiles.models import Profile
 from bumblebee.buzzes.models import Buzz, Rebuzz
+from bumblebee.comments.models import Comment
+
+
+######################################
+##           OWNER
+######################################
 
 
 class IsOwner(BasePermission):
     """ """
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view, obj: CustomUser):
         """ """
 
         is_owner = obj == request.user
@@ -29,20 +35,6 @@ class IsProfileOwner(BasePermission):
         """ """
 
         return obj.user == request.user
-
-
-class IsBuzzPublic(BasePermission):
-    def has_object_permission(self, request, view, obj: Buzz):
-        """ """
-
-        try:
-            assert isinstance(obj, Buzz), "`obj` must be an instance of model `Buzz`"
-
-            return obj.privacy == Buzz.PrivacyChoices.PUBLIC
-
-        except AssertionError as error:
-            print(error)
-            raise error
 
 
 class IsBuzzOwner(BasePermission):
@@ -79,6 +71,39 @@ class IsRebuzzOwner(BasePermission):
             raise error
 
 
+class IsCommentOwner(BasePermission):
+    """ """
+
+    def has_object_permission(self, request, view, obj: Comment):
+        """
+        obj: Buzz instance
+        """
+        try:
+            assert isinstance(obj, Comment), "`obj` must be an instance of model `Buzz`"
+
+            return obj.commenter == request.user
+        except AssertionError as error:
+            print(error)
+            raise error
+
+
+######################################
+##           PRIVACY
+######################################
+class IsBuzzPublic(BasePermission):
+    def has_object_permission(self, request, view, obj: Buzz):
+        """ """
+
+        try:
+            assert isinstance(obj, Buzz), "`obj` must be an instance of model `Buzz`"
+
+            return obj.privacy == Buzz.PrivacyChoices.PUBLIC
+
+        except AssertionError as error:
+            print(error)
+            raise error
+
+
 class IsProfilePrivate(BasePermission):
     """ """
 
@@ -86,6 +111,11 @@ class IsProfilePrivate(BasePermission):
         """ """
 
         return obj.private == True
+
+
+######################################
+##           MATCHING
+######################################
 
 
 class IsPasswordMatching(BasePermission):
