@@ -30,8 +30,6 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
-    # "rest_framework.authtoken",
-    "drf_yasg",  # for docs generation
 ]
 
 LOCAL_APPS = [
@@ -40,6 +38,7 @@ LOCAL_APPS = [
     "bumblebee.core.apps.CoreConfig",
     "bumblebee.comments.apps.CommentsConfig",
     "bumblebee.connections.apps.ConnectionsConfig",
+    "bumblebee.feeds.apps.FeedsConfig",
     "bumblebee.notifications.apps.NotificationsConfig",
     "bumblebee.profiles.apps.ProfilesConfig",
     "bumblebee.users.apps.UsersConfig",

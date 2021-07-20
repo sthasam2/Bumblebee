@@ -47,20 +47,7 @@ class UserDetailView(APIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsOwner]
 
-    @swagger_auto_schema(
-        # request_body=UserSerializer,
-        # responses={
-        #     status.HTTP_401_UNAUTHORIZED: openapi.Response(
-        #         description="Access Denied", schema=Response400Schema
-        #     ),
-        #     status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
-        #         description="Internal Error", schema=Response500Schema
-        #     ),
-        #     status.HTTP_200_OK: openapi.Response(
-        #         description="Login Accepted", schema=LoginAcceptedResponseSchema
-        #     ),
-        # },
-    )
+
     def get(self, request, *args, **kwargs):
         """ """
 

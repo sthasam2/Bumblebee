@@ -1,5 +1,10 @@
 # Changelogs
 
+## v.0.1.9.1: Configured ElephantSQL, Removed some dependencies
+
+1. Configured ElephantSQl
+2. Removed drf-yasg, django-heroku
+
 ## v.0.1.9: Added Connection System
 
 1. Added Follow, Mute, Block system API Views

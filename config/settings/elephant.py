@@ -30,8 +30,6 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
-    # "rest_framework.authtoken",
-    "drf_yasg",  # for docs generation
 ]
 
 LOCAL_APPS = [
@@ -39,6 +37,8 @@ LOCAL_APPS = [
     "bumblebee.buzzes.apps.BuzzesConfig",
     "bumblebee.core.apps.CoreConfig",
     "bumblebee.comments.apps.CommentsConfig",
+    "bumblebee.connections.apps.ConnectionsConfig",
+    "bumblebee.feeds.apps.FeedsConfig",
     "bumblebee.notifications.apps.NotificationsConfig",
     "bumblebee.profiles.apps.ProfilesConfig",
     "bumblebee.users.apps.UsersConfig",
@@ -78,13 +78,25 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": get_environ_variable("PSQL_NAME"),
+#         "USER": get_environ_variable("PSQL_USER"),
+#         "PASSWORD": get_environ_variable("PSQL_PASSWORD"),
+#         "HOST": get_environ_variable("PSQL_HOST"),
+#         "PORT": "",
+#     }
+# }
+
+# ESQL
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_environ_variable("PSQL_NAME"),
-        "USER": get_environ_variable("PSQL_USER"),
-        "PASSWORD": get_environ_variable("PSQL_PASSWORD"),
-        "HOST": get_environ_variable("PSQL_HOST"),
+        "NAME": get_environ_variable("ESQL_NAME"),
+        "USER": get_environ_variable("ESQL_USER"),
+        "PASSWORD": get_environ_variable("ESQL_PASSWORD"),
+        "HOST": get_environ_variable("ESQL_HOST"),
         "PORT": "",
     }
 }
