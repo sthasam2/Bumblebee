@@ -1,5 +1,5 @@
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+# from drf_yasg import openapi
+# from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
@@ -23,19 +23,19 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
     serializer_class = CustomTokenObtainPairSerializer
 
-    @swagger_auto_schema(
-        responses={
-            HTTP_401_UNAUTHORIZED: openapi.Response(
-                description="Access Denied", schema=Response400Schema
-            ),
-            HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
-                description="Internal Error", schema=Response500Schema
-            ),
-            HTTP_200_OK: openapi.Response(
-                description="Login Accepted", schema=LoginAcceptedResponseSchema
-            ),
-        },
-    )
+    # @swagger_auto_schema(
+    #     responses={
+    #         HTTP_401_UNAUTHORIZED: openapi.Response(
+    #             description="Access Denied", schema=Response400Schema
+    #         ),
+    #         HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
+    #             description="Internal Error", schema=Response500Schema
+    #         ),
+    #         HTTP_200_OK: openapi.Response(
+    #             description="Login Accepted", schema=LoginAcceptedResponseSchema
+    #         ),
+    #     },
+    # )
     def post(self, request, *args, **kwargs):
         """
         POST method for jwt  tokens

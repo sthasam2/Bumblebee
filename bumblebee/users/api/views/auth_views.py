@@ -1,6 +1,7 @@
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
-from drf_yasg.utils import swagger_auto_schema
+
+# from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -137,19 +138,19 @@ class ResendEmailVerificationView(APIView):
     permission_classes = [AllowAny]
     serializer_class = SendEmailVerificationSerializer
 
-    @swagger_auto_schema(
-        # responses={
-        #     status.HTTP_401_UNAUTHORIZED: openapi.Response(
-        #         description="Access Denied", schema=Response400Schema
-        #     ),
-        #     status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
-        #         description="Internal Error", schema=Response500Schema
-        #     ),
-        #     status.HTTP_200_OK: openapi.Response(
-        #         description="Login Accepted", schema=LoginAcceptedResponseSchema
-        #     ),
-        # },
-    )
+    # @swagger_auto_schema(
+    # responses={
+    #     status.HTTP_401_UNAUTHORIZED: openapi.Response(
+    #         description="Access Denied", schema=Response400Schema
+    #     ),
+    #     status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
+    #         description="Internal Error", schema=Response500Schema
+    #     ),
+    #     status.HTTP_200_OK: openapi.Response(
+    #         description="Login Accepted", schema=LoginAcceptedResponseSchema
+    #     ),
+    # },
+    # )
     def post(self, request, *args, **kwargs):
         """ """
         try:

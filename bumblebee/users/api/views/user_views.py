@@ -1,4 +1,4 @@
-from drf_yasg.utils import swagger_auto_schema
+# from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.permissions import (
@@ -46,7 +46,6 @@ class UserDetailView(APIView):
 
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsOwner]
-
 
     def get(self, request, *args, **kwargs):
         """ """

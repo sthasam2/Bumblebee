@@ -17,6 +17,7 @@ class BuzzInteractionsSerializer(serializers.ModelSerializer):
         source="downvotes", help_text="list of ids of users who downvoted"
     )
     comments = serializers.ListField(help_text="list of ids of comments")
+    upvote_count = serializers.IntegerField(source=len("upvotes"))
 
     class Meta:
         model = BuzzInteractions
@@ -26,6 +27,7 @@ class BuzzInteractionsSerializer(serializers.ModelSerializer):
             "upvote_ids",
             "downvote_ids",
             "comments",
+            "upvote_count",
         ]
 
 
