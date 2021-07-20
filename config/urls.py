@@ -17,7 +17,8 @@ urlpatterns = [
     path("api/profile/", include("bumblebee.profiles.urls"), name="profiles"),
     path("api/content/", include("bumblebee.buzzes.urls"), name="buzzes"),
     path("api/comment/", include("bumblebee.comments.urls"), name="comments"),
-    path("api/connection/", include("bumblebee.connections.urls"), name="connection"),
+    path("api/connection/", include("bumblebee.connections.urls"), name="connections"),
+    path("api/feed/", include("bumblebee.feeds.urls"), name="feeds"),
 ]
 
 if DEBUG:

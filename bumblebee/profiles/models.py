@@ -16,6 +16,7 @@ class Profile(models.Model):
 
     account_verified = models.BooleanField(default=False)
 
+    persona = models.PositiveIntegerField(default=1)
     avatar = models.ImageField(default="default.png", upload_to="avatar/")
     cover = models.ImageField(default="default.png", upload_to="cover/")
 

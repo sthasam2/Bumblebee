@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from bumblebee.core.exceptions import (
     MissingFieldsError,
     NoneExistenceError,
+    SelfReferenceError,
     UrlParameterError,
 )
 from bumblebee.core.helpers import create_200, create_400, create_500
@@ -193,7 +194,7 @@ class RetrieveUserConnectionListView(APIView):
             return Response(
                 create_500(
                     cause=error.args[0] or None,
-                    verbose=f"Could not get connection users for `connection_userid_list` due to an unknown error",
+                    verbose=f"Could not get connected users for `{user_instance.username}` due to an unknown error",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -514,6 +515,16 @@ class FollowUnfollowRequestUnrequestView(APIView):
                 username=username_to_follow_unfollow
             )
 
+            if user_instance.id == self.request.user.id:
+                raise SelfReferenceError(
+                    "Self reference",
+                    create_400(
+                        400,
+                        "Self Reference",
+                        "Cannot follow, mute or block oneself",
+                    ),
+                )
+
             return user_instance
         else:
             raise MissingFieldsError(
@@ -592,7 +603,12 @@ class FollowUnfollowRequestUnrequestView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        except (MissingFieldsError, UrlParameterError, NoneExistenceError) as error:
+        except (
+            SelfReferenceError,
+            MissingFieldsError,
+            UrlParameterError,
+            NoneExistenceError,
+        ) as error:
             return Response(error.message, status=error.message.get("status"))
 
         except (PermissionDenied, NotAuthenticated) as error:
@@ -628,6 +644,16 @@ class MuteUnmuteView(APIView):
             user_instance = DbExistenceChecker().check_return_user_existence(
                 username=username_to_mute_unmute
             )
+
+            if user_instance.id == self.request.user.id:
+                raise SelfReferenceError(
+                    "Self reference",
+                    create_400(
+                        400,
+                        "Self Reference",
+                        "Cannot follow, mute or block oneself",
+                    ),
+                )
 
             return user_instance
         else:
@@ -666,7 +692,12 @@ class MuteUnmuteView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        except (MissingFieldsError, UrlParameterError, NoneExistenceError) as error:
+        except (
+            SelfReferenceError,
+            MissingFieldsError,
+            UrlParameterError,
+            NoneExistenceError,
+        ) as error:
             return Response(error.message, status=error.message.get("status"))
 
         except (PermissionDenied, NotAuthenticated) as error:
@@ -702,6 +733,16 @@ class BlockUnblockView(APIView):
             user_instance = DbExistenceChecker().check_return_user_existence(
                 username=username_to_block_unblock
             )
+
+            if user_instance.id == self.request.user.id:
+                raise SelfReferenceError(
+                    "Self reference",
+                    create_400(
+                        400,
+                        "Self Reference",
+                        "Cannot follow, mute or block oneself",
+                    ),
+                )
 
             return user_instance
         else:
@@ -739,7 +780,12 @@ class BlockUnblockView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        except (MissingFieldsError, UrlParameterError, NoneExistenceError) as error:
+        except (
+            SelfReferenceError,
+            MissingFieldsError,
+            UrlParameterError,
+            NoneExistenceError,
+        ) as error:
             return Response(error.message, status=error.message.get("status"))
 
         except (PermissionDenied, NotAuthenticated) as error:

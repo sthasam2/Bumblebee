@@ -1,5 +1,14 @@
 # Changelogs
 
+## v.0.1.10: Added Feed System, Bug fixes, Additions
+
+1. Added Feed system API Views
+2. Added persona field to Profile model for inbuilt character avatar
+3. Fixed User Serializer and other bugs
+4. Added DRF Pagination
+5. Adjustments for connectoins. Now users cant follow/mute/block ownself.
+6. Changed some endpoints.
+
 ## v.0.1.9.1: Configured ElephantSQL, Removed some dependencies
 
 1. Configured ElephantSQl

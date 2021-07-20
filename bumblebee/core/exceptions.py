@@ -137,6 +137,14 @@ class ExpiredError(CustomBaseError):
     pass
 
 
+class SelfReferenceError(CustomBaseError):
+    """
+    Exception raised when a ownself is refernced for certain tasks
+    """
+
+    pass
+
+
 class PermissionDeniedError(PermissionDenied):
     """ """
 

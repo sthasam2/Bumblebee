@@ -29,7 +29,7 @@ urlpatterns = [
         name="connection-list",
     ),
     path(
-        "user/username=<str:username>/connection/list",
+        "user/username=<str:username>/list",
         RetrieveUserConnectionListView.as_view(),
         name="user-connection-list",
     ),
