@@ -1,15 +1,29 @@
+import datetime as dt
+import random
+
+import pytz
 from django.db.models import Q
 
-import datetime as dt
-
 from bumblebee.buzzes.models import Buzz, Rebuzz
+from bumblebee.users.models import CustomUser
+from config.definitions import TIME_ZONE
+
+
+def select_max_10_random(ids_list):
+    """ """
+    random_ids = set()
+    for i in range(0, 10):
+        choice = random.choice(ids_list)
+        random_ids.add(choice)
+    return list(random_ids)
 
 
 def get_date_a_week_ago():
     """Get the date a week ago"""
 
-    today = dt.datetime.now()
-    weekago = today - dt.timedelta(days=7)
+    weekago = pytz.timezone(TIME_ZONE).localize(dt.datetime.utcnow()) - pytz.timezone(
+        TIME_ZONE
+    ).localize(dt.timedelta(days=7))
     return weekago
 
 
@@ -34,3 +48,27 @@ def get_folowing_buzzes_for_user(owner_user):
     )
 
     return dict(buzzes=buzzes.all(), rebuzzes=rebuzzes.all())
+
+
+def get_follow_suggestions_for_user(owner_user):
+    """Get followings of an authentucated user's followings to suggest"""
+
+    following_ids = owner_user.user_following.following
+    blacklist_ids = owner_user.user_muted.muted + owner_user.user_blocked.blocked
+
+    rec_ids = []
+    for account in CustomUser.objects.filter(id__in=following_ids):
+        rec_ids += account.user_following.following
+
+    filtered_ids = list(
+        set(rec_ids) - set(following_ids) - set(blacklist_ids) - set([owner_user.id])
+    )
+
+    if len(filtered_ids) >= 10:
+        return CustomUser.objects.filter(id__in=select_max_10_random(filtered_ids))[:10]
+
+    elif len(filtered_ids) > 0:
+        return CustomUser.objects.filter(id__in=filtered_ids)
+
+    else:
+        return CustomUser.objects.all()[:10]

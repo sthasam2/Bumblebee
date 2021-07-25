@@ -15,4 +15,9 @@ urlpatterns = [
         FeedBuzzListView.as_view(),
         name="feed-post-list",
     ),
+    path(
+        "follow_suggestions",
+        FeedBuzzListView.as_view(),
+        name="feed-suggestions-list",
+    ),
 ]

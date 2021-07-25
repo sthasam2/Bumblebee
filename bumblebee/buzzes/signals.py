@@ -8,6 +8,11 @@ from bumblebee.activities.utils import _create_activity
 from .models import Buzz, Rebuzz, BuzzInteractions, RebuzzInteractions
 
 
+#########################################
+#           CONTENTS
+#########################################
+
+
 @receiver(post_save, sender=Buzz)
 def post_save_create_interaction_activity(sender, instance, created, **kwargs):
     """ """
@@ -34,3 +39,36 @@ def post_save_create_interaction_activity(sender, instance, created, **kwargs):
             ContentType.objects.get_for_model(instance),
             instance.id,
         )
+
+
+#########################################
+#           INTERACTIONS
+#########################################
+
+
+@receiver(post_save, sender=BuzzInteractions)
+def post_save_create_interaction_activity(sender, instance, created, **kwargs):
+    """ """
+
+    # if created:
+    #     RebuzzInteractions.objects.create(rebuzz=instance)
+    #     _create_activity(
+    #         instance.author,
+    #         UserActivity.Actions.POST,
+    #         ContentType.objects.get_for_model(instance),
+    #         instance.id,
+    #     )
+
+
+@receiver(post_save, sender=RebuzzInteractions)
+def post_save_create_interaction_activity(sender, instance, created, **kwargs):
+    """ """
+
+    # if created:
+    #     RebuzzInteractions.objects.create(rebuzz=instance)
+    #     _create_activity(
+    #         instance.author,
+    #         UserActivity.Actions.POST,
+    #         ContentType.objects.get_for_model(instance),
+    #         instance.id,
+    #     )
