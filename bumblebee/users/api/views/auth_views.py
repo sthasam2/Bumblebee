@@ -5,6 +5,7 @@ from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -342,6 +343,7 @@ class VerifyEmailView(APIView):
     """ """
 
     permission_classes = [AllowAny]
+    renderer_classes = [TemplateHTMLRenderer, JSONRenderer]
 
     def get(self, request, *args, **kwargs):
         """
@@ -401,13 +403,21 @@ class VerifyEmailView(APIView):
             user_to_verify.email_verified = True
             user_to_verify.save()
 
-            return Response(
-                create_200(
-                    200,
-                    "Email verified",
-                    "Email has been verified. Now you can login to your account",
+            if request.accepted_renderer.format == "json":
+
+                return Response(
+                    create_200(
+                        200,
+                        "Email verified",
+                        "Email has been verified. Now you can login to your account",
+                    )
                 )
-            )
+            else:
+
+                return Response(
+                    {"user": user_to_verify},
+                    template_name="users/email_verified.html",
+                )
 
         except (NoneExistenceError, ExpiredError, UnmatchedFieldsError) as error:
             return Response(error.message, status=status.HTTP_400_BAD_REQUEST)

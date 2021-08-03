@@ -1,6 +1,6 @@
 # Bumblebee
 
-![version](https://img.shields.io/badge/version-0.2.0-blue)
+![version](https://img.shields.io/badge/version-0.2.1-blue)
 
 A social media for YOU
 
@@ -32,19 +32,19 @@ Find the Changlogs @[docs/changelogs.md](docs/changelogs.md)
 2. **Activate virtualenv**
 * **Windows** 
 
-``` powershell
+```powershell
 .venv\scripts\activate
 ```
 
 * **Linux**
 
-``` BASH
+```BASH
 source .venv/bin/activate
 ```
 
 3. **After all the mentioned dependencies are installed, run command:**
 
-``` python
+```python
 poetry install
 ```
 
@@ -52,6 +52,6 @@ This will install all the required dependencies for the project using the **poet
   
 To check more dependencies enter command 
 
-``` python
+```python
 poetry show
 ```

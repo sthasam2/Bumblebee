@@ -12,8 +12,8 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
     created_date = serializers.DateTimeField()
     updated_date = serializers.DateTimeField()
     account_verified = serializers.BooleanField()
-    use_persona = serializers.BooleanField(source="profile.use_persona")
-    persona = serializers.IntegerField(source="profile.persona")
+    use_persona = serializers.BooleanField()
+    persona = serializers.IntegerField()
     avatar = serializers.ImageField()
     cover = serializers.ImageField()
     bio = serializers.CharField(
@@ -69,8 +69,8 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     account_verified = serializers.BooleanField()
 
-    use_persona = serializers.BooleanField(source="profile.use_persona")
-    persona = serializers.IntegerField(source="profile.persona")
+    use_persona = serializers.BooleanField()
+    persona = serializers.IntegerField()
     avatar = serializers.ImageField()
     cover = serializers.ImageField()
     bio = serializers.CharField(
@@ -121,8 +121,8 @@ class ProfilePrivateSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(source="user.id")
     username = serializers.CharField(source="user.username")
     account_verified = serializers.BooleanField()
-    use_persona = serializers.BooleanField(source="profile.use_persona")
-    persona = serializers.IntegerField(source="profile.persona")
+    use_persona = serializers.BooleanField()
+    persona = serializers.IntegerField()
     avatar = serializers.ImageField()
     cover = serializers.ImageField()
     nickname = serializers.CharField()

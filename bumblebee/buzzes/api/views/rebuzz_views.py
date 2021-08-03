@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from bumblebee.buzzes.models import Buzz
+from bumblebee.buzzes.models import Rebuzz
 from bumblebee.buzzes.utils import (
     get_buzz_from_buzzid_or_raise,
     get_rebuzz_from_rebuzzid_or_raise,
@@ -123,17 +123,17 @@ class RebuzzListView(APIView):
     # TODO: Fix user profile private stuff
     permission_classes = [AllowAny]
 
-    def _get_buzzes(self, *args, **kwargs):
+    def _get_rebuzzes(self, *args, **kwargs):
         """ """
-        rebuzzid_list = self.request.data.get("buzzid_list", False)
+        rebuzzid_list = self.request.data.get("rebuzzid_list", False)
 
         if rebuzzid_list:
-            buzzes = Buzz.objects.filter(id__in=rebuzzid_list)
+            rebuzzes = Rebuzz.objects.filter(id__in=rebuzzid_list)
             return dict(
-                public=buzzes.filter(privacy="pub").all(),
-                private=set(doc.id for doc in buzzes.filter(privacy="priv")),
+                public=rebuzzes.filter(privacy="pub").all(),
+                private=set(doc.id for doc in rebuzzes.filter(privacy="priv")),
                 non_existing=(
-                    set(rebuzzid_list) - set([buzz.id for buzz in buzzes.all()])
+                    set(rebuzzid_list) - set([rebuzz.id for rebuzz in rebuzzes.all()])
                 ),
             )
         else:
@@ -150,7 +150,7 @@ class RebuzzListView(APIView):
         """ """
 
         try:
-            rebuzz_instances = self._get_buzzes()
+            rebuzz_instances = self._get_rebuzzes()
             rebuzz_serializer = RebuzzDetailSerializer(
                 rebuzz_instances.get("public"), many=True
             )

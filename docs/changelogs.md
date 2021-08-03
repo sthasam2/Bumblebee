@@ -1,7 +1,12 @@
 # Changelogs
 
+## v.0.2.1: Bugg Fixes, template View
+
+1. Added HTML template view for Email verification
+2. Bug Fixes
 
 ## v.0.2: Added Notification System, Bug Fixes, Additions, Modifications
+
 1. Added:
    1. Notification system logic and end points
    2. Added Sensitivity Analysis app (Not completed)
