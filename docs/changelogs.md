@@ -1,5 +1,9 @@
 # Changelogs
 
+## v.0.2.2: Bugg Fixes
+
+1. Bug Fixes
+
 ## v.0.2.1: Bugg Fixes, template View
 
 1. Added HTML template view for Email verification

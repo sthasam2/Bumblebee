@@ -165,7 +165,7 @@ class UpvoteBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
 
     buzzid = serializers.IntegerField(source="buzz.id")
     contenttype = serializers.CharField(default="Buzz")
-    action = serializers.CharField(default="Comment")
+    action = serializers.CharField(default="Upvoted")
     timestamp = serializers.DateTimeField()
     agent_username = serializers.CharField(source="agent.username")
     agent_id = serializers.CharField(source="agent.id")
@@ -192,7 +192,7 @@ class DownvoteBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
 
     buzzid = serializers.IntegerField(source="buzz.id")
     contenttype = serializers.CharField(default="Buzz")
-    action = serializers.CharField(default="Comment")
+    action = serializers.CharField(default="Downvoted")
 
     timestamp = serializers.DateTimeField()
 
@@ -222,7 +222,7 @@ class RebuzzBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
 
     buzzid = serializers.IntegerField(source="buzz.id")
     contenttype = serializers.CharField(default="Buzz")
-    action = serializers.CharField(default="Comment")
+    action = serializers.CharField(default="Rebuzzed")
 
     timestamp = serializers.DateTimeField()
 
@@ -252,7 +252,7 @@ class CommentBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
 
     buzzid = serializers.IntegerField(source="buzz.id")
     contenttype = serializers.CharField(default="Buzz")
-    action = serializers.CharField(default="Comment")
+    action = serializers.CharField(default="Commented")
 
     timestamp = serializers.DateTimeField()
 
