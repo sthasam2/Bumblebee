@@ -4,15 +4,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from bumblebee.core.helpers import create_200, create_400, create_500
+from bumblebee.comments.utils import (
+    create_comment_upvdwv_meta,
+    delete_comment_upvdwv_meta,
+    get_interactions_from_commentid_or_raise,
+)
 from bumblebee.core.exceptions import NoneExistenceError, UrlParameterError
+from bumblebee.core.helpers import create_200, create_400, create_500
 from bumblebee.core.permissions import IsBuzzPublic
-from bumblebee.comments.utils import get_interactions_from_commentid_or_raise
-
-# upvote
-# downvote
-# view TODO
-
+from bumblebee.notifications.choices import ACTION_TYPE, CONTENT_TYPE
+from bumblebee.notifications.utils import create_notification, delete_notification
 
 ########################################
 ##              COMMENT
@@ -36,13 +37,41 @@ class UpvoteCommentView(APIView):
             if userid in comment_interaction.downvotes:
                 comment_interaction.downvotes.remove(userid)
 
+                delete_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["CMNT"],
+                    request.user,
+                    comment_interaction.comment,
+                )
+
             # check if already upvoted
             if userid not in comment_interaction.upvotes:
                 comment_interaction.upvotes.append(userid)
                 task = "Added UPVOTE"
+
+                create_comment_upvdwv_meta(
+                    userid=userid, comment_interaction=comment_interaction, action="UPV"
+                )
+                create_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["CMNT"],
+                    request.user,
+                    comment_interaction.comment,
+                )
+
             else:
                 comment_interaction.upvotes.remove(userid)
-                task = "Removed DOWNVOTE"
+                task = "Removed UPVOTE"
+
+                delete_comment_upvdwv_meta(
+                    userid=userid, comment_interaction=comment_interaction, action="UPV"
+                )
+                delete_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["CMNT"],
+                    request.user,
+                    comment_interaction.comment,
+                )
 
             comment_interaction.save()
 
@@ -93,13 +122,40 @@ class DownvoteCommentView(APIView):
             if userid in comment_interaction.upvotes:
                 comment_interaction.upvotes.remove(userid)
 
+                delete_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["CMNT"],
+                    request.user,
+                    comment_interaction.comment,
+                )
+
             # check if already in downvoted
             if userid not in comment_interaction.downvotes:
                 comment_interaction.downvotes.append(userid)
                 task = "Added DOWNVOTE"
+
+                create_comment_upvdwv_meta(
+                    userid=userid, comment_interaction=comment_interaction, action="DWV"
+                )
+                create_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["CMNT"],
+                    request.user,
+                    comment_interaction.comment,
+                )
             else:
                 comment_interaction.downvotes.remove(userid)
                 task = "Removed DOWNVOTE"
+
+                delete_comment_upvdwv_meta(
+                    userid=userid, comment_interaction=comment_interaction, action="DWV"
+                )
+                delete_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["CMNT"],
+                    request.user,
+                    comment_interaction.comment,
+                )
 
             comment_interaction.save()
 

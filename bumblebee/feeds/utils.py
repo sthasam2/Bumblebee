@@ -21,9 +21,9 @@ def select_max_10_random(ids_list):
 def get_date_a_week_ago():
     """Get the date a week ago"""
 
-    weekago = pytz.timezone(TIME_ZONE).localize(dt.datetime.utcnow()) - pytz.timezone(
-        TIME_ZONE
-    ).localize(dt.timedelta(days=7))
+    weekago = pytz.timezone(TIME_ZONE).localize(dt.datetime.utcnow()) - dt.timedelta(
+        days=7
+    )
     return weekago
 
 

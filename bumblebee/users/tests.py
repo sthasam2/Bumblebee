@@ -1,8 +1,8 @@
 import random
 import string
 
-
 from django.test import TestCase
+
 from bumblebee.users.models import CustomUser
 
 

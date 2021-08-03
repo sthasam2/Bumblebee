@@ -41,12 +41,12 @@ urlpatterns = [
     path(
         "user/username=<str:username>/following/detail",
         RetrieveFollowingListView.as_view(),
-        name="following-detailt",
+        name="following-detail",
     ),
     path(
         "user/muted/detail",
         RetrieveMutedIDListView.as_view(),
-        name="create-muted-detail",
+        name="muted-detail",
     ),
     path(
         "user/blocked/detail",
@@ -55,7 +55,7 @@ urlpatterns = [
     ),
     # create
     path(
-        "user/follow/accept",
+        "user/follower_request/accept",
         AcceptFollowRequestView.as_view(),
         name="accept-follow",
     ),

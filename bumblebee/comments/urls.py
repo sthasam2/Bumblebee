@@ -6,18 +6,18 @@ comment-detail
 
 from django.urls import path
 
+from bumblebee.comments.api.views.comment_interaction_views import (
+    DownvoteCommentView,
+    UpvoteCommentView,
+)
 from bumblebee.comments.api.views.comment_views import (
     BuzzOrRebuzzCommentListView,
-    CommentReplyListView,
     CommentDetailView,
+    CommentReplyListView,
+    CreateCommentReplyView,
     CreateCommentView,
     DeleteCommentView,
     EditCommentView,
-    CreateCommentReplyView,
-)
-from bumblebee.comments.api.views.comment_interaction_views import (
-    UpvoteCommentView,
-    DownvoteCommentView,
 )
 
 urlpatterns = [
@@ -34,7 +34,12 @@ urlpatterns = [
     path(
         "buzz/id=<int:buzzid>/create",
         CreateCommentView.as_view(),
-        name="create-comment",
+        name="create-buzz-comment",
+    ),
+    path(
+        "rebuzz/id=<int:rebuzzid>/create",
+        CreateCommentView.as_view(),
+        name="create-rebuzz-comment",
     ),
     path(
         "id=<int:commentid>/reply/create",

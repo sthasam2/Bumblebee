@@ -1,16 +1,36 @@
 from rest_framework import serializers
 
-from bumblebee.buzzes.models import Rebuzz
-from bumblebee.core.exceptions import UnknownModelFieldsError
-from bumblebee.buzzes.api.serializers.interaction_serializers import (
-    BuzzInteractionsSerializer,
-)
 from bumblebee.buzzes.api.serializers.buzz_serializers import (
     BuzzDetailSerializer,
     ListBuzzImageSerializer,
 )
+from bumblebee.buzzes.api.serializers.interaction_serializers import (
+    BuzzInteractionsSerializer,
+)
+from bumblebee.buzzes.models import Rebuzz, RebuzzImage
+from bumblebee.core.exceptions import UnknownModelFieldsError
 
-from .user_serializers import BuzzUserSerializer
+from .user_serializers import RebuzzUserSerializer
+
+
+class RebuzzImageSerializer(serializers.ModelSerializer):
+    """ """
+
+    image = serializers.ImageField(required=False, use_url=True)
+
+    class Meta:
+        model = RebuzzImage
+        fields = ["image"]
+
+
+class ListRebuzzImageSerializer(serializers.ModelSerializer):
+    """ """
+
+    image = serializers.ImageField(required=False, use_url=True)
+
+    class Meta:
+        model = RebuzzImage
+        fields = ["image"]
 
 
 class RebuzzDetailSerializer(serializers.ModelSerializer):
@@ -28,10 +48,15 @@ class RebuzzDetailSerializer(serializers.ModelSerializer):
     location = serializers.CharField()
     flair = serializers.ListField(child=serializers.CharField())
 
-    author = BuzzUserSerializer(many=False)
-    buzz = BuzzDetailSerializer(source="buzz_rebuzz", many=False)
+    author = RebuzzUserSerializer(many=False)
+    buzz = BuzzDetailSerializer(many=False)
     images = ListBuzzImageSerializer(source="buzz_image", many=True, read_only=True)
     interaction = BuzzInteractionsSerializer(source="buzz_interaction", read_only=True)
+
+
+    sentiment_value = serializers.FloatField() 
+    textblob_value = serializers.FloatField()
+
 
     class Meta:
         model = Rebuzz
@@ -48,6 +73,8 @@ class RebuzzDetailSerializer(serializers.ModelSerializer):
             "buzz",
             "images",
             "interaction",
+            "sentiment_value",
+            "textblob_value",
         ]
 
 
@@ -122,10 +149,14 @@ class RebuzzListSerializer(serializers.Serializer):
     location = serializers.CharField()
     flair = serializers.ListField()
 
-    author = BuzzUserSerializer()
+    author = RebuzzUserSerializer()
     buzz = BuzzDetailSerializer(source="buzz_rebuzz", many=False)
     images = ListBuzzImageSerializer(source="buzz_image", many=True, read_only=True)
     interaction = BuzzInteractionsSerializer(source="buzz_interaction", read_only=True)
+
+    sentiment_value = serializers.FloatField() 
+    textblob_value = serializers.FloatField()
+
 
     class Meta:
         """ """
@@ -143,5 +174,7 @@ class RebuzzListSerializer(serializers.Serializer):
             "buzz",
             "images",
             "interaction",
+            "sentiment_value",
+            "textblob_value",
         ]
         # depth = 1

@@ -4,9 +4,9 @@ from django.dispatch import receiver
 
 from bumblebee.activities.models import UserActivity
 from bumblebee.activities.utils import _create_activity
+from bumblebee.connections.models import Blocked, Follower, Following, Muted
 from bumblebee.profiles.models import Profile
 from config.definitions import DEBUG
-from bumblebee.connections.models import Blocked, Follower, Following, Muted
 
 from .models import CustomUser
 

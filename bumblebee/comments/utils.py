@@ -1,10 +1,15 @@
+from django.db.models import Q
 from rest_framework import status
 
-from bumblebee.comments.models import Comment, CommentInteractions
+from bumblebee.comments.models import (
+    Comment,
+    CommentInteractions,
+    CommentUpvoteDownvoteMeta,
+)
 from bumblebee.core.exceptions import (
+    MissingFieldsError,
     NoneExistenceError,
     UrlParameterError,
-    MissingFieldsError,
 )
 from bumblebee.core.helpers import create_400
 
@@ -58,7 +63,7 @@ def get_interactions_from_commentid_or_raise(**kwargs):
         try:
             return CommentInteractions.objects.get(comment__id=url_commentid)
 
-        except (TypeError, ValueError, OverflowError, Comment.DoesNotExist):
+        except (TypeError, ValueError, OverflowError, CommentInteractions.DoesNotExist):
             raise NoneExistenceError(
                 url_commentid,
                 create_400(
@@ -76,3 +81,42 @@ def get_interactions_from_commentid_or_raise(**kwargs):
                 "`commentid` must be provided",
             ),
         )
+
+
+def create_comment_upvdwv_meta(comment_interaction, userid, action):
+    """ """
+
+    if action == "UPV":
+
+        CommentUpvoteDownvoteMeta.objects.create(
+            comment_interaction=comment_interaction,
+            userid=userid,
+            action=CommentUpvoteDownvoteMeta.ActionChoices.UPVOTE,
+        )
+    elif action == "DWV":
+        CommentUpvoteDownvoteMeta.objects.create(
+            comment_interaction=comment_interaction,
+            userid=userid,
+            action=CommentUpvoteDownvoteMeta.ActionChoices.DOWNVOTE,
+        )
+
+
+def delete_comment_upvdwv_meta(comment_interaction, userid, action):
+    """ """
+
+    if action == "UPV":
+        meta = CommentUpvoteDownvoteMeta.objects.get(
+            Q(comment_interaction=comment_interaction),
+            Q(userid=userid),
+            Q(action=CommentUpvoteDownvoteMeta.ActionChoices.UPVOTE),
+        )
+        if meta:
+            meta.delete()
+    elif action == "DWV":
+        meta = CommentUpvoteDownvoteMeta.objects.get(
+            Q(comment_interaction=comment_interaction),
+            Q(userid=userid),
+            Q(action=CommentUpvoteDownvoteMeta.ActionChoices.DOWNVOTE),
+        )
+        if meta:
+            meta.delete()

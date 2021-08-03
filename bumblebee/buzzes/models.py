@@ -1,9 +1,9 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models.fields import DateTimeField
 from django.urls import reverse
 
 from bumblebee.users.models import CustomUser
-
 
 ######################################
 #           BUZZ
@@ -41,6 +41,9 @@ class AbstractBuzz(models.Model):
 
     location = models.CharField(max_length=500, blank=True, null=True)
     flair = ArrayField(models.CharField(max_length=100), blank=True, default=list)
+
+    sentiment_value = models.FloatField(null=True, blank=True) 
+    textblob_value = models.FloatField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -118,7 +121,7 @@ class Rebuzz(AbstractBuzz):
 class AbstractBuzzInteractions(models.Model):
     """ """
 
-    views = models.IntegerField(blank=False, unique=False, default=0)
+    updated_date = models.DateTimeField(auto_now=True)
 
     upvotes = ArrayField(
         models.PositiveIntegerField(blank=False), blank=True, default=list
@@ -129,6 +132,9 @@ class AbstractBuzzInteractions(models.Model):
     comments = ArrayField(
         models.PositiveIntegerField(blank=False), blank=True, default=list
     )
+    rebuzzes = ArrayField(
+        models.PositiveIntegerField(blank=False), blank=True, default=list
+    )
 
     class Meta:
         abstract = True
@@ -136,16 +142,22 @@ class AbstractBuzzInteractions(models.Model):
     def __str__(self):
         return f"Interactions for Buzz: id-{self.buzz.id}"
 
+    def get_upvote_count(self):
+        return len(self.upvotes)
+
+    def get_downvote_count(self):
+        return len(self.downvotes)
+
+    def get_comment_count(self):
+        return len(self.comments)
+
+    def get_rebuzz_count(self):
+        return len(self.rebuzzes)
+
 
 class BuzzInteractions(AbstractBuzzInteractions):
     """ """
 
-    # abstract_buzz_interaction = models.OneToOneField(
-    #     AbstractBuzzInteractions,
-    #     parent_link=False,
-    #     related_name="buzz_interactions",
-    #     on_delete=models.CASCADE,
-    # )
     buzz = models.OneToOneField(
         Buzz,
         related_name="buzz_interaction",
@@ -156,18 +168,69 @@ class BuzzInteractions(AbstractBuzzInteractions):
 class RebuzzInteractions(AbstractBuzzInteractions):
     """ """
 
-    # abstract_buzz_interaction = models.OneToOneField(
-    #     AbstractBuzzInteractions,
-    #     parent_link=False,
-    #     related_name="rebuzz_interactions",
-    #     on_delete=models.CASCADE,
-    # )
     rebuzz = models.OneToOneField(
         Rebuzz,
         name="rebuzz",
         related_name="rebuzz_interaction",
         on_delete=models.CASCADE,
     )
+
+
+######################################
+#           BUZZ UPVDWV META
+######################################
+
+
+class UpvoteDownvoteMetaAbstract(models.Model):
+    """ """
+
+    class ActionChoices(models.TextChoices):
+        """
+        Choices for action options
+        """
+
+        UPVOTE = "upv", "upvote"
+        PUBLIC = "downvote", "downvote"  # open for anyone public
+
+    action = models.CharField(max_length=100, choices=ActionChoices.choices)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class BuzzUpvoteDownvoteMeta(UpvoteDownvoteMetaAbstract):
+    """ """
+
+    agent = models.ForeignKey(
+        CustomUser, related_name="user_buzz_upvdwv_meta", on_delete=models.CASCADE
+    )
+
+    buzz_interaction = models.ForeignKey(
+        BuzzInteractions,
+        related_name="buzz_interaction_upvdwv_meta",
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f"userid: {self.userid} {self.action} Buzz on {self.date}"
+
+
+class RebuzzUpvoteDownvoteMeta(UpvoteDownvoteMetaAbstract):
+    """ """
+
+    agent = models.ForeignKey(
+        CustomUser, related_name="user_rebuzz_upvdwv_meta", on_delete=models.CASCADE
+    )
+
+    rebuzz_interaction = models.ForeignKey(
+        RebuzzInteractions,
+        related_name="rebuzz_interaction_upvdwv_meta",
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f"userid: {self.userid} {self.action} Rebuzz on {self.date}"
 
 
 ######################################
@@ -197,12 +260,6 @@ class AbstractBuzzImage(models.Model):
 class BuzzImage(AbstractBuzzImage):
     """ """
 
-    # abstract_buzz_image = models.OneToOneField(
-    #     AbstractBuzzImage,
-    #     parent_link=False,
-    #     related_name="buzz_image",
-    #     on_delete=models.CASCADE,
-    # )
     buzz = models.ForeignKey(
         Buzz,
         related_name="buzz_image",
@@ -213,12 +270,6 @@ class BuzzImage(AbstractBuzzImage):
 class RebuzzImage(AbstractBuzzImage):
     """ """
 
-    # abstract_buzz_image = models.OneToOneField(
-    #     AbstractBuzzImage,
-    #     parent_link=False,
-    #     related_name="rebuzz_image",
-    #     on_delete=models.CASCADE,
-    # )
     rebuzz = models.OneToOneField(
         Rebuzz,
         name="rebuzz",

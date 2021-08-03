@@ -1,7 +1,8 @@
 import datetime as dt
-import pytz
 
+import pytz
 from django.core.exceptions import ValidationError
+
 from config.settings.local import TIME_ZONE
 
 

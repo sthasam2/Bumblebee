@@ -1,5 +1,20 @@
 # Changelogs
 
+
+## v.0.2: Added Notification System, Bug Fixes, Additions, Modifications
+1. Added:
+   1. Notification system logic and end points
+   2. Added Sensitivity Analysis app (Not completed)
+   3. Added Communities Analysis app (Not completed)
+   4. Added some exceptions
+2. Modified:
+   1.  Database Models for multiple models
+   2. Modified Serializers
+   3. Modified settings
+3. Bug Fixes on various parts
+4. Code Beautification and sorting
+5. Tests: All endpoints tested
+
 ## v.0.1.10: Added Feed System, Bug fixes, Additions
 
 1. Added Feed system API Views

@@ -2,11 +2,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
-from bumblebee.activities.utils import _create_activity
 from bumblebee.activities.models import UserActivity
+from bumblebee.activities.utils import _create_activity
 from config.definitions import DEBUG
-
 
 from .models import Profile
 

@@ -1,9 +1,8 @@
 from django.urls import path
 
-
 from config.definitions import DEBUG
-from .api.views import HomeView
 
+from .api.views import HomeView
 
 if DEBUG:
     from rest_framework import permissions
@@ -17,7 +16,6 @@ if DEBUG:
     #     public=True,
     #     permission_classes=[permissions.AllowAny],
     # )
-
     # docs_urls = [
     #     path(
     #         "docs/swagger",

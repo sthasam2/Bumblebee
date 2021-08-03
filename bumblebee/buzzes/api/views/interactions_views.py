@@ -1,21 +1,22 @@
 from rest_framework import status
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from bumblebee.core.helpers import create_200, create_400, create_500
 from bumblebee.buzzes.utils import (
     get_buzz_interaction_from_buzzid_or_raise,
     get_rebuzz_interaction_from_rebuzzid_or_raise,
 )
-from bumblebee.core.exceptions import NoneExistenceError, UrlParameterError
-from bumblebee.core.permissions import IsBuzzPublic
-
-# upvote
-# downvote
-# view TODO
-
+from bumblebee.core.exceptions import (
+    NoneExistenceError,
+    NotAuthenticated,
+    PermissionDenied,
+    UrlParameterError,
+)
+from bumblebee.core.helpers import create_200, create_400, create_500
+from bumblebee.core.permissions import IsBuzzPublic, IsRebuzzPublic
+from bumblebee.notifications.choices import ACTION_TYPE, CONTENT_TYPE
+from bumblebee.notifications.utils import create_notification, delete_notification
 
 ########################################
 ##              BUZZ
@@ -43,13 +44,33 @@ class UpvoteBuzzView(APIView):
             if userid in buzz_interaction.downvotes:
                 buzz_interaction.downvotes.remove(userid)
 
+                delete_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["BUZZ"],
+                    request.user,
+                    buzz_interaction.buzz,
+                )
             # check if already upvoted
             if userid not in buzz_interaction.upvotes:
                 buzz_interaction.upvotes.append(userid)
                 task = "Added UPVOTE"
+
+                create_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["BUZZ"],
+                    request.user,
+                    buzz_interaction.buzz,
+                )
             else:
                 buzz_interaction.upvotes.remove(userid)
-                task = "Removed DOWNVOTE"
+                task = "Removed UPVOTE"
+
+                delete_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["BUZZ"],
+                    request.user,
+                    buzz_interaction.buzz,
+                )
 
             buzz_interaction.save()
 
@@ -101,13 +122,35 @@ class DownvoteBuzzView(APIView):
             if userid in buzz_interaction.upvotes:
                 buzz_interaction.upvotes.remove(userid)
 
+                delete_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["BUZZ"],
+                    request.user,
+                    buzz_interaction.buzz,
+                )
+
             # check if already in downvoted
             if userid not in buzz_interaction.downvotes:
                 buzz_interaction.downvotes.append(userid)
                 task = "Added DOWNVOTE"
+
+                create_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["BUZZ"],
+                    request.user,
+                    buzz_interaction.buzz,
+                )
+
             else:
                 buzz_interaction.downvotes.remove(userid)
                 task = "Removed DOWNVOTE"
+
+                delete_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["BUZZ"],
+                    request.user,
+                    buzz_interaction.buzz,
+                )
 
             buzz_interaction.save()
 
@@ -148,7 +191,7 @@ class DownvoteBuzzView(APIView):
 class UpvoteRebuzzView(APIView):
     """ """
 
-    permission_classes = [IsAuthenticated, IsBuzzPublic]
+    permission_classes = [IsAuthenticated, IsRebuzzPublic]
 
     def post(self, request, *args, **kwargs):
         """ """
@@ -156,7 +199,7 @@ class UpvoteRebuzzView(APIView):
         try:
             rebuzz_interaction = get_rebuzz_interaction_from_rebuzzid_or_raise(**kwargs)
 
-            self.check_object_permissions(request, rebuzz_interaction.buzz)
+            self.check_object_permissions(request, rebuzz_interaction.rebuzz)
 
             userid = request.user.id
 
@@ -164,13 +207,35 @@ class UpvoteRebuzzView(APIView):
             if userid in rebuzz_interaction.downvotes:
                 rebuzz_interaction.downvotes.remove(userid)
 
+                delete_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["RBZ"],
+                    request.user,
+                    rebuzz_interaction.rebuzz,
+                )
+
             # check if already upvoted
             if userid not in rebuzz_interaction.upvotes:
                 rebuzz_interaction.upvotes.append(userid)
                 task = "Added UPVOTE"
+
+                create_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["RBZ"],
+                    request.user,
+                    rebuzz_interaction.rebuzz,
+                )
+
             else:
                 rebuzz_interaction.upvotes.remove(userid)
                 task = "Removed DOWNVOTE"
+
+                delete_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["RBZ"],
+                    request.user,
+                    rebuzz_interaction.rebuzz,
+                )
 
             rebuzz_interaction.save()
 
@@ -208,28 +273,48 @@ class UpvoteRebuzzView(APIView):
 class DownvoteRebuzzView(APIView):
     """ """
 
-    permission_classes = [IsAuthenticated, IsBuzzPublic]
+    permission_classes = [IsAuthenticated, IsRebuzzPublic]
 
     def post(self, request, *args, **kwargs):
         """ """
 
         try:
             rebuzz_interaction = get_rebuzz_interaction_from_rebuzzid_or_raise(**kwargs)
-            self.check_object_permissions(request, rebuzz_interaction.buzz)
+            self.check_object_permissions(request, rebuzz_interaction.rebuzz)
             userid = request.user.id
 
             # check if already upvoted
             if userid in rebuzz_interaction.upvotes:
                 rebuzz_interaction.upvotes.remove(userid)
 
+                delete_notification(
+                    ACTION_TYPE["UPV"],
+                    CONTENT_TYPE["RBZ"],
+                    request.user,
+                    rebuzz_interaction.rebuzz,
+                )
+
             # check if already in downvoted
             if userid not in rebuzz_interaction.downvotes:
                 rebuzz_interaction.downvotes.append(userid)
                 task = "Added DOWNVOTE"
+
+                create_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["RBZ"],
+                    request.user,
+                    rebuzz_interaction.rebuzz,
+                )
             else:
                 rebuzz_interaction.downvotes.remove(userid)
                 task = "Removed DOWNVOTE"
 
+                delete_notification(
+                    ACTION_TYPE["DWV"],
+                    CONTENT_TYPE["RBZ"],
+                    request.user,
+                    rebuzz_interaction.rebuzz,
+                )
             rebuzz_interaction.save()
 
             return Response(

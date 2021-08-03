@@ -1,12 +1,11 @@
 from django.contrib.auth.base_user import BaseUserManager
 
-from config.definitions import DEBUG
-
 from bumblebee.core.exceptions import (
     NoneExistenceError,
     PreExistenceError,
     PreviousValueMatchingError,
 )
+from config.definitions import DEBUG
 
 
 class CustomUserManager(BaseUserManager):

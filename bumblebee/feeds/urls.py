@@ -6,7 +6,10 @@ comment-detail
 
 from django.urls import path
 
-from bumblebee.feeds.api.views.feed_views import FeedBuzzListView
+from bumblebee.feeds.api.views.feed_views import (
+    FeedBuzzListView,
+    FeedFollowSuggestionsListView,
+)
 
 urlpatterns = [
     # retrieve
@@ -17,7 +20,7 @@ urlpatterns = [
     ),
     path(
         "follow_suggestions",
-        FeedBuzzListView.as_view(),
+        FeedFollowSuggestionsListView.as_view(),
         name="feed-suggestions-list",
     ),
 ]

@@ -35,9 +35,9 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "bumblebee.activities.apps.ActivitiesConfig",
     "bumblebee.buzzes.apps.BuzzesConfig",
-    "bumblebee.core.apps.CoreConfig",
     "bumblebee.comments.apps.CommentsConfig",
     "bumblebee.connections.apps.ConnectionsConfig",
+    "bumblebee.core.apps.CoreConfig",
     "bumblebee.feeds.apps.FeedsConfig",
     "bumblebee.notifications.apps.NotificationsConfig",
     "bumblebee.profiles.apps.ProfilesConfig",

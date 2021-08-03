@@ -1,10 +1,12 @@
 from rest_framework import status
+
 from bumblebee.core.exceptions import (
     MissingFieldsError,
     NoneExistenceError,
     UrlParameterError,
 )
-from bumblebee.core.helpers import create_400, RequestFieldsChecker
+from bumblebee.core.helpers import RequestFieldsChecker, create_400
+
 from .models import Profile
 
 

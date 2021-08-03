@@ -3,28 +3,25 @@ from django.urls import path
 from bumblebee.buzzes.api.views.buzz_views import (
     BuzzDetailView,
     BuzzListView,
-    UserBuzzListView,
     CreateBuzzView,
-    EditBuzzView,
     DeleteBuzzView,
+    EditBuzzView,
+    UserBuzzListView,
 )
-
+from bumblebee.buzzes.api.views.interactions_views import (
+    DownvoteBuzzView,
+    DownvoteRebuzzView,
+    UpvoteBuzzView,
+    UpvoteRebuzzView,
+)
 from bumblebee.buzzes.api.views.rebuzz_views import (
+    CreateRebuzzView,
+    DeleteRebuzzView,
+    EditRebuzzView,
     RebuzzDetailView,
     RebuzzListView,
     UserRebuzzListView,
-    CreateRebuzzView,
-    EditRebuzzView,
-    DeleteRebuzzView,
 )
-
-from bumblebee.buzzes.api.views.interactions_views import (
-    UpvoteBuzzView,
-    DownvoteBuzzView,
-    UpvoteRebuzzView,
-    DownvoteRebuzzView,
-)
-
 
 buzz = [
     path("buzz/list", BuzzListView.as_view(), name="buzz-list"),

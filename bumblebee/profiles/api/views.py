@@ -11,10 +11,7 @@ from bumblebee.core.exceptions import (
     UrlParameterError,
 )
 from bumblebee.core.helpers import create_200, create_400, create_500
-from bumblebee.core.permissions import (
-    IsProfileOwner,
-    IsProfilePasswordMatching,
-)
+from bumblebee.core.permissions import IsProfileOwner, IsProfilePasswordMatching
 from bumblebee.profiles.utils import (
     check_fields,
     get_profile_from_url_username_or_raise,
@@ -24,9 +21,9 @@ from .serializers import (
     ChangePrivateProfileSerializer,
     ProfileImagesSerializer,
     ProfileOwnerSerializer,
-    ProfileSummarySerializer,
     ProfilePrivateSerializer,
     ProfilePublicSerializer,
+    ProfileSummarySerializer,
     UpdateProfileSerializer,
 )
 
@@ -138,6 +135,8 @@ class UpdateProfileView(APIView):
         "dob" / ISO 8601: `2013-01-29T12:34:56.000000Z` /,
         "location",
         "phone",
+        "use_persona",
+        "persona",
     ]
     - required_fields = ["current_password"]
     """
@@ -156,6 +155,8 @@ class UpdateProfileView(APIView):
         "dob",
         "location",
         "phone",
+        "use_persona",
+        "persona",
     ]
 
     def patch(self, request, *args, **kwargs):
@@ -362,6 +363,156 @@ class ProfileImageUploadView(APIView):
                 create_500(
                     cause=error.args[0] or None,
                     verbose=f"Could not make private `{kwargs.get('username')}` due to an unknown error",
+                ),
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class EnableDisablePersonaView(APIView):
+    """
+    Update User Profile
+
+    Method
+    ---
+    patch:
+
+    - field_options = [
+    ]
+    - required_fields = ["current_password"]
+    """
+
+    serializer_class = UpdateProfileSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsProfileOwner,
+        IsProfilePasswordMatching,
+    ]
+    required_fields = ["current_password"]
+    field_options = None
+
+    def patch(self, request, *args, **kwargs):
+        """ """
+
+        try:
+            data = request.data
+
+            profile_to_update = get_profile_from_url_username_or_raise(**kwargs)
+            check_fields(data, self.field_options, self.required_fields)
+            self.check_object_permissions(request, profile_to_update)
+
+            serializer = self.serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+
+            persona_enabled = profile_to_update.use_persona
+            profile_to_update.use_persona = not persona_enabled
+            profile_to_update.save()
+
+            return Response(
+                create_200(
+                    status.HTTP_200_OK,
+                    "Profile Updated",
+                    f"Profile credentials of user `{kwargs.get('username')}` has been updated. Use_persona set to {not persona_enabled}",
+                ),
+                status=status.HTTP_200_OK,
+            )
+
+        except (
+            UrlParameterError,
+            NoneExistenceError,
+            ExtraFieldsError,
+            MissingFieldsError,
+        ) as error:
+            return Response(error.message, status=error.message.get("status"))
+
+        except (PermissionDenied, NotAuthenticated) as error:
+            return Response(
+                create_400(
+                    error.status_code,
+                    error.get_codes(),
+                    error.get_full_details().get("message"),
+                ),
+                status=error.status_code,
+            )
+
+        except Exception as error:
+            return Response(
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not update credentials for `{kwargs.get('username')}` due to an unknown error",
+                ),
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class SetPersonaView(APIView):
+    """
+    Update User Profile
+
+    Method
+    ---
+    patch:
+
+    - field_options = [
+        "persona",
+    ]
+    - required_fields = ["current_password"]
+    """
+
+    serializer_class = UpdateProfileSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsProfileOwner,
+        IsProfilePasswordMatching,
+    ]
+    required_fields = ["current_password"]
+    field_options = ["persona"]
+
+    def patch(self, request, *args, **kwargs):
+        """ """
+
+        try:
+            data = request.data
+
+            profile_to_update = get_profile_from_url_username_or_raise(**kwargs)
+            check_fields(data, self.field_options, self.required_fields)
+            self.check_object_permissions(request, profile_to_update)
+
+            serializer = self.serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.update_profile(profile_to_update, **serializer.validated_data)
+
+            return Response(
+                create_200(
+                    status.HTTP_200_OK,
+                    "Profile Updated",
+                    f"Profile credentials of user `{kwargs.get('username')}` has been updated. Persona has been set to {data['persona']}",
+                ),
+                status=status.HTTP_200_OK,
+            )
+
+        except (
+            UrlParameterError,
+            NoneExistenceError,
+            ExtraFieldsError,
+            MissingFieldsError,
+        ) as error:
+            return Response(error.message, status=error.message.get("status"))
+
+        except (PermissionDenied, NotAuthenticated) as error:
+            return Response(
+                create_400(
+                    error.status_code,
+                    error.get_codes(),
+                    error.get_full_details().get("message"),
+                ),
+                status=error.status_code,
+            )
+
+        except Exception as error:
+            return Response(
+                create_500(
+                    cause=error.args[0] or None,
+                    verbose=f"Could not update credentials for `{kwargs.get('username')}` due to an unknown error",
                 ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

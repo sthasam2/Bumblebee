@@ -12,6 +12,8 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
     created_date = serializers.DateTimeField()
     updated_date = serializers.DateTimeField()
     account_verified = serializers.BooleanField()
+    use_persona = serializers.BooleanField(source="profile.use_persona")
+    persona = serializers.IntegerField(source="profile.persona")
     avatar = serializers.ImageField()
     cover = serializers.ImageField()
     bio = serializers.CharField(
@@ -46,6 +48,8 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
             "created_date",
             "updated_date",
             "account_verified",
+            "use_persona",
+            "persona",
             "avatar",
             "cover",
             "bio",
@@ -64,6 +68,9 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(source="user.username")
     account_verified = serializers.BooleanField()
+
+    use_persona = serializers.BooleanField(source="profile.use_persona")
+    persona = serializers.IntegerField(source="profile.persona")
     avatar = serializers.ImageField()
     cover = serializers.ImageField()
     bio = serializers.CharField(
@@ -94,6 +101,8 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
         fields = [
             "username",
             "account_verified",
+            "use_persona",
+            "persona",
             "avatar",
             "cover",
             "bio",
@@ -112,6 +121,8 @@ class ProfilePrivateSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(source="user.id")
     username = serializers.CharField(source="user.username")
     account_verified = serializers.BooleanField()
+    use_persona = serializers.BooleanField(source="profile.use_persona")
+    persona = serializers.IntegerField(source="profile.persona")
     avatar = serializers.ImageField()
     cover = serializers.ImageField()
     nickname = serializers.CharField()
@@ -123,6 +134,8 @@ class ProfilePrivateSerializer(serializers.Serializer):
             "user_id",
             "username",
             "account_verified",
+            "use_persona",
+            "persona",
             "avatar",
             "cover",
             "nickname",

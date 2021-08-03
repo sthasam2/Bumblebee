@@ -4,16 +4,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from bumblebee.core.exceptions import (
-    MissingFieldsError,
-    NoneExistenceError,
-    SelfReferenceError,
-    UrlParameterError,
-)
-from bumblebee.core.helpers import create_200, create_400, create_500
-from bumblebee.core.permissions import IsOwner
-from bumblebee.users.utils import DbExistenceChecker
-from bumblebee.users.models import CustomUser
 from bumblebee.connections.api.serializers.connection_serializers import (
     BlockedSerializer,
     FollowerSerializer,
@@ -23,6 +13,23 @@ from bumblebee.connections.api.serializers.connection_serializers import (
 from bumblebee.connections.api.serializers.connection_users_serializers import (
     ConnectionUserSerializer,
 )
+from bumblebee.core.exceptions import (
+    MissingFieldsError,
+    NoneExistenceError,
+    PreExistenceError,
+    SelfReferenceError,
+    UrlParameterError,
+)
+from bumblebee.core.helpers import create_200, create_400, create_500
+from bumblebee.core.permissions import IsOwner
+from bumblebee.notifications.signals import (
+    new_follower_request_signal,
+    new_follower_request_accept_signal,
+    new_follower_request_reject_signal,
+    new_follower_signal,
+)
+from bumblebee.users.models import CustomUser
+from bumblebee.users.utils import DbExistenceChecker
 
 ######################################
 ##           RETRIEVE
@@ -466,19 +473,48 @@ class AcceptFollowRequestView(APIView):
                 user_to_accept.user_following.following.append(owner_user.id)
                 user_to_accept.user_following.requesting_to_follow.remove(owner_user.id)
 
-            owner_user.user_follower.save()
-            user_to_accept.user_following.save()
+                new_follower_signal.send(
+                    sender=self.__class__,
+                    owner=owner_user,
+                    follower=user_to_accept,
+                )
 
-            return Response(
-                data=create_200(
-                    status.HTTP_200_OK,
-                    "follow",
-                    f"Successfully accepted @{user_to_accept.username}",
-                ),
-                status=status.HTTP_200_OK,
-            )
+                new_follower_request_accept_signal.send(
+                    sender=self.__class__,
+                    owner=owner_user,
+                    follow_requester=user_to_accept,
+                )
 
-        except (MissingFieldsError, UrlParameterError, NoneExistenceError) as error:
+                owner_user.user_follower.save()
+                user_to_accept.user_following.save()
+
+                #  send a signal to create notification
+
+                return Response(
+                    data=create_200(
+                        status.HTTP_200_OK,
+                        "follow",
+                        f"Successfully accepted @{user_to_accept.username} for follow",
+                    ),
+                    status=status.HTTP_200_OK,
+                )
+
+            elif user_to_accept.id in owner_user.user_follower.follower:
+                raise PreExistenceError(
+                    "User accept follow",
+                    create_200(
+                        status.HTTP_200_OK,
+                        "follow",
+                        f"User @{user_to_accept.username} already following",
+                    ),
+                )
+
+        except (
+            MissingFieldsError,
+            UrlParameterError,
+            NoneExistenceError,
+            PreExistenceError,
+        ) as error:
             return Response(error.message, status=error.message.get("status"))
 
         except (PermissionDenied, NotAuthenticated) as error:
@@ -550,6 +586,8 @@ class FollowUnfollowRequestUnrequestView(APIView):
                 user_to_follow_unfollow.user_follower.follower.remove(owner_user.id)
                 task = "Unfollow"
 
+                # owner_user.user_follower.
+
             #  if not private and not followed follow
             elif not user_to_follow_unfollow.profile.private:
                 # if not followed follow
@@ -562,6 +600,13 @@ class FollowUnfollowRequestUnrequestView(APIView):
                         user_to_follow_unfollow.id
                     )
                     task = "Follow"
+
+                    #  send a signal to create notification
+                    new_follower_signal.send(
+                        sender=self.__class__,
+                        owner=user_to_follow_unfollow,
+                        follower=owner_user,
+                    )
 
             # If private create request
             elif user_to_follow_unfollow.profile.private:
@@ -576,6 +621,13 @@ class FollowUnfollowRequestUnrequestView(APIView):
                         user_to_follow_unfollow.id
                     )
                     task = "Request Follow"
+
+                    #  send a signal to create notification
+                    new_follower_request_signal.send(
+                        sender=self.__class__,
+                        owner=user_to_follow_unfollow,
+                        follow_requester=owner_user,
+                    )
 
                 elif (
                     owner_user.id
@@ -673,11 +725,11 @@ class MuteUnmuteView(APIView):
             user_to_mute_unmute = self._get_user_to_mute_unmute()
             task = None
 
-            if user_to_mute_unmute not in owner_user.user_muted.muted:
+            if user_to_mute_unmute.id not in owner_user.user_muted.muted:
                 owner_user.user_muted.muted.append(user_to_mute_unmute.id)
                 task = "Mute"
 
-            elif user_to_mute_unmute in owner_user.user_muted.muted:
+            elif user_to_mute_unmute.id in owner_user.user_muted.muted:
                 owner_user.user_muted.muted.remove(user_to_mute_unmute.id)
                 task = "Unmute"
 
@@ -845,17 +897,23 @@ class DeleteFollowRequestView(APIView):
             user_to_reject = self._get_user_to_reject()
 
             if user_to_reject.id in owner_user.user_follower.requests_for_follow:
-                owner_user.user_follower.request_for_follow.remove(user_to_reject.id)
+                owner_user.user_follower.requests_for_follow.remove(user_to_reject.id)
                 user_to_reject.user_following.requesting_to_follow.remove(owner_user.id)
 
                 owner_user.user_follower.save()
                 user_to_reject.user_following.save()
 
+                new_follower_request_reject_signal.send(
+                    sender=self.__class__,
+                    owner=owner_user,
+                    follow_requester=user_to_reject,
+                )
+
                 return Response(
                     data=create_200(
                         status.HTTP_200_OK,
                         "follow",
-                        f"Successfully accepted @{user_to_reject.username}",
+                        f"Successfully rejected @{user_to_reject.username}",
                     ),
                     status=status.HTTP_200_OK,
                 )

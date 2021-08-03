@@ -7,12 +7,14 @@ from rest_framework.views import APIView
 
 from bumblebee.buzzes.models import Buzz
 from bumblebee.buzzes.utils import (
-    get_rebuzz_from_rebuzzid_or_raise,
     get_buzz_from_buzzid_or_raise,
+    get_rebuzz_from_rebuzzid_or_raise,
+    check_previously_rebuzzed,
 )
 from bumblebee.core.exceptions import (
     MissingFieldsError,
     NoneExistenceError,
+    PreExistenceError,
     UrlParameterError,
 )
 from bumblebee.core.helpers import (
@@ -21,17 +23,16 @@ from bumblebee.core.helpers import (
     create_400,
     create_500,
 )
-from bumblebee.core.permissions import IsRebuzzOwner, IsProfilePrivate
+from bumblebee.core.permissions import IsProfilePrivate, IsRebuzzOwner
+from bumblebee.notifications.choices import ACTION_TYPE, CONTENT_TYPE
+from bumblebee.notifications.utils import create_notification, delete_notification
 from bumblebee.users.utils import DbExistenceChecker
 
-from ..serializers.buzz_serializers import (
-    BuzzImageSerializer,
-)
-
 from ..serializers.rebuzz_serializers import (
-    RebuzzDetailSerializer,
     CreateRebuzzSerializer,
     EditRebuzzSerializer,
+    RebuzzDetailSerializer,
+    RebuzzImageSerializer,
 )
 
 ##################################
@@ -55,8 +56,8 @@ class UserRebuzzListView(APIView):
 
             if user_instance.profile.private:
                 raise PermissionDenied(
-                    detail="Private Profile",
-                    code="User has made their profile private.",
+                    detail="User has made their profile private.",
+                    code="Private Profile",
                 )
 
             return user_instance
@@ -83,7 +84,7 @@ class UserRebuzzListView(APIView):
         """ """
 
         try:
-            rebuzz_instances = self._get_buzzes()
+            rebuzz_instances = self._get_rebuzzes()
             rebuzz_serializer = RebuzzDetailSerializer(rebuzz_instances, many=True)
 
             return Response(
@@ -213,7 +214,7 @@ class RebuzzDetailView(APIView):
         """
 
         try:
-            rebuzz_instance = self._get_rebuzz(**kwargs)
+            rebuzz_instance = self._get_rebuzz(request, **kwargs)
             serializer = RebuzzDetailSerializer(rebuzz_instance)
 
             return Response(
@@ -255,7 +256,6 @@ class CreateRebuzzView(APIView):
 
     serializer_class = CreateRebuzzSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
 
     def _check_referenced_buzz(self, *args, **kwargs):
         """
@@ -271,7 +271,7 @@ class CreateRebuzzView(APIView):
 
         return request.data.__contains__("images")
 
-    def _handle_buzz_images(self, request, created_buzz):
+    def _handle_rebuzz_images(self, request, created_rebuzz):
         """
         Handle images if image is present in request.data
 
@@ -284,17 +284,36 @@ class CreateRebuzzView(APIView):
                 raise MissingFieldsError(
                     "request.data.images",
                     create_400(
-                        400, "Missing Field", "Request body missing `image` field"
+                        400, "Missing Field", "Request body missing `images` field"
                     ),
                 )
 
             for image in request.data.getlist("images"):
-                buzz_image = BuzzImageSerializer(data=dict(image=image))
-                if buzz_image.is_valid(raise_exception=True):
-                    buzz_image.save(buzz=created_buzz, **buzz_image.validated_data)
+                rebuzz_image = RebuzzImageSerializer(data=dict(image=image))
+                if rebuzz_image.is_valid(raise_exception=True):
+                    rebuzz_image.save(
+                        rebuzz=created_rebuzz, **rebuzz_image.validated_data
+                    )
 
         except Exception as error:
             print("error @handle_buzz_image", error)
+            raise error
+
+    def _check_previously_rebuzzed(self, buzzid):
+        """ """
+
+        try:
+            if check_previously_rebuzzed(user=self.request.user, buzzid=buzzid):
+                raise PreExistenceError(
+                    "rebuzz",
+                    create_400(
+                        400,
+                        "Pre-existence of rebuzz",
+                        "The given buzz has been previously rebuzzed. Cannot rebuzz again.",
+                    ),
+                )
+        except Exception as error:
+            print("error @check_previously_rebuzz", error)
             raise error
 
     def post(self, request, *args, **kwargs):
@@ -319,7 +338,19 @@ class CreateRebuzzView(APIView):
             )
             # handle images
             if data.__contains__("images"):
-                self._handle_buzz_images(request, created_rebuzz)
+                self._handle_rebuzz_images(request, created_rebuzz)
+
+            referenced_buzz.buzz_interaction.rebuzzes.append(created_rebuzz.id)
+            referenced_buzz.buzz_interaction.save()
+
+            # create notification
+            create_notification(
+                ACTION_TYPE["RBZ"],
+                CONTENT_TYPE["BUZZ"],
+                request.user,
+                referenced_buzz,
+                created_rebuzz,
+            )
 
             return Response(
                 create_200(
@@ -376,13 +407,13 @@ class EditRebuzzView(APIView):
         """
 
         rebuzz = get_rebuzz_from_rebuzzid_or_raise(**kwargs)
-        if rebuzz.privacy != "pub":
-            raise PermissionDenied(
-                detail="Rebuzz not Public",
-                code="User has made not made their rebuzz public.",
-            )
-        else:
+        if rebuzz.author == self.request.user:
             return rebuzz
+        else:
+            raise PermissionDenied(
+                detail="Rebuzz doesn't belong to requesting user",
+                code="Rebuzz ownership mismatch",
+            )
 
     def patch(self, request, *args, **kwargs):
         """ """
@@ -400,7 +431,7 @@ class EditRebuzzView(APIView):
 
             serializer = self.serializer_class(data=data)
             serializer.is_valid(raise_exception=True)
-            serializer.update_buzz(rebuzz_to_update, **serializer.validated_data)
+            serializer.update_rebuzz(rebuzz_to_update, **serializer.validated_data)
 
             return Response(
                 create_200(
@@ -451,9 +482,15 @@ class DeleteRebuzzView(APIView):
         """ """
 
         try:
-            buzz_to_delete = get_rebuzz_from_rebuzzid_or_raise(**kwargs)
-            self.check_object_permissions(request, buzz_to_delete)
-            buzz_to_delete.delete()
+            rebuzz_to_delete = get_rebuzz_from_rebuzzid_or_raise(**kwargs)
+            self.check_object_permissions(request, rebuzz_to_delete)
+
+            rebuzz_to_delete_id = rebuzz_to_delete.id
+            rebuzz_to_delete.delete()
+
+            referenced_buzz = rebuzz_to_delete.buzz
+            referenced_buzz.buzz_interaction.rebuzzes.remove(rebuzz_to_delete_id)
+            referenced_buzz.buzz_interaction.save()
 
             return Response(
                 create_200(

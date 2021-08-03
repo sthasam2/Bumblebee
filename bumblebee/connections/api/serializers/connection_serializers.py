@@ -5,9 +5,8 @@ Serializers for Connection
 from rest_framework import serializers
 
 from bumblebee.comments.models import Comment
-from bumblebee.core.exceptions import UnknownModelFieldsError
 from bumblebee.connections.models import Blocked, Follower, Following, Muted
-
+from bumblebee.core.exceptions import UnknownModelFieldsError
 
 from .connection_users_serializers import ConnectionUserSerializer
 

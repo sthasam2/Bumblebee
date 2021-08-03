@@ -11,10 +11,7 @@ from bumblebee.core.exceptions import (
     NoneExistenceError,
     UrlParameterError,
 )
-from bumblebee.core.helpers import (
-    create_400,
-    create_500,
-)
+from bumblebee.core.helpers import create_400, create_500
 from bumblebee.feeds.api.serializers.feed_serializers import (
     FeedBuzzSerializer,
     FeedRebuzzSerializer,

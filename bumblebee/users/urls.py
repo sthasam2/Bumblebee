@@ -12,8 +12,8 @@ from .api.views.auth_views import (
 )
 from .api.views.user_views import (
     ActivateUserView,
-    DeactivateUserView,
     ChangePasswordView,
+    DeactivateUserView,
     DeleteUserView,
     UpdateUserView,
     UserDetailView,

@@ -1,8 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Follower, Following, Muted, Blocked
-
+from .models import Blocked, Follower, Following, Muted
 
 admin.site.register(Following)
 admin.site.register(Follower)

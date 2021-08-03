@@ -35,7 +35,6 @@ from bumblebee.users.api.serializers import (
 from bumblebee.users.models import CustomUser
 from bumblebee.users.utils import DbExistenceChecker, EmailSender
 
-
 ##################################
 ##          RETRIEVE
 ##################################
@@ -120,6 +119,7 @@ class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated, IsOwner, IsPasswordMatching]
     field_options = ["username", "email", "active"]
     required_fields = ["current_password"]
+    message = ""
 
     def patch(self, request, *args, **kwargs):
         """ """
@@ -188,7 +188,7 @@ class UpdateUserView(APIView):
                     create_200(
                         status.HTTP_202_ACCEPTED,
                         "User Updated",
-                        f"Account with username `{url_username}` updated to new credentials!",
+                        f"Account with username `{url_username}` updated to new credentials! {self.message}",
                     ),
                     status=status.HTTP_202_ACCEPTED,
                 )
@@ -241,6 +241,7 @@ class ChangePasswordView(UpdateUserView):
     permission_classes = [IsAuthenticated, IsOwner, IsPasswordMatching]
     field_options = ["password", "current_password"]
     required_fields = field_options
+    message = "Password successfully changed."
 
 
 class DeactivateUserView(UpdateUserView):
@@ -250,6 +251,7 @@ class DeactivateUserView(UpdateUserView):
     permission_classes = [IsAuthenticated, IsOwner, IsPasswordMatching]
     field_options = ["active", "current_password"]
     required_fields = field_options
+    message = "User account has been deactivated."
 
 
 class ActivateUserView(APIView):
@@ -259,6 +261,7 @@ class ActivateUserView(APIView):
     serializer_class = ActivateSerializer
     field_options = ["username", "email"]
     required_fields = ["current_password"]
+    message = "User account has been reactivated."
 
     def get(self, request):
         return Response("Activate page")

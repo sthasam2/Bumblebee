@@ -1,11 +1,10 @@
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 
-from bumblebee.users.models import CustomUser
-from bumblebee.profiles.models import Profile
 from bumblebee.buzzes.models import Buzz, Rebuzz
 from bumblebee.comments.models import Comment
-
+from bumblebee.profiles.models import Profile
+from bumblebee.users.models import CustomUser
 
 ######################################
 ##           OWNER
@@ -98,6 +97,20 @@ class IsBuzzPublic(BasePermission):
             assert isinstance(obj, Buzz), "`obj` must be an instance of model `Buzz`"
 
             return obj.privacy == Buzz.PrivacyChoices.PUBLIC
+
+        except AssertionError as error:
+            print(error)
+            raise error
+
+
+class IsRebuzzPublic(BasePermission):
+    def has_object_permission(self, request, view, obj: Rebuzz):
+        """ """
+
+        try:
+            assert isinstance(obj, Rebuzz), "`obj` must be an instance of model `Buzz`"
+
+            return obj.privacy == Rebuzz.PrivacyChoices.PUBLIC
 
         except AssertionError as error:
             print(error)

@@ -6,8 +6,8 @@ from .models import (
     BuzzImage,
     BuzzInteractions,
     Rebuzz,
-    RebuzzInteractions,
     RebuzzImage,
+    RebuzzInteractions,
 )
 
 

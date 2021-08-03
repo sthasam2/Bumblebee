@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from bumblebee.users.models import CustomUser
 from bumblebee.buzzes.api.serializers.buzz_serializers import BuzzDetailSerializer
+from bumblebee.users.models import CustomUser
 
 
 class ConnectionUserSerializer(serializers.ModelSerializer):
@@ -10,6 +10,8 @@ class ConnectionUserSerializer(serializers.ModelSerializer):
     userid = serializers.IntegerField(source="id")
     username = serializers.CharField()
     account_verified = serializers.BooleanField(source="profile.account_verified")
+    use_persona = serializers.BooleanField(source="profile.use_persona")
+    persona = serializers.IntegerField(source="profile.persona")
     avatar = serializers.ImageField(source="profile.avatar")
     nickname = serializers.CharField(source="profile.nickname")
 
@@ -19,6 +21,8 @@ class ConnectionUserSerializer(serializers.ModelSerializer):
             "userid",
             "username",
             "account_verified",
+            "use_persona",
+            "persona",
             "avatar",
             "nickname",
         ]

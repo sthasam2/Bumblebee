@@ -1,5 +1,4 @@
 from django.db.models import Q
-
 from rest_framework import status
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -10,7 +9,12 @@ from bumblebee.buzzes.utils import (
     get_buzz_from_buzzid_or_raise,
     get_rebuzz_from_rebuzzid_or_raise,
 )
+from bumblebee.comments.utils import (
+    get_comment_from_commentid_or_raise,
+    get_comments_from_commentid_list,
+)
 from bumblebee.core.exceptions import (
+    ExtraFieldsError,
     MissingFieldsError,
     NoneExistenceError,
     UrlParameterError,
@@ -22,12 +26,9 @@ from bumblebee.core.helpers import (
     create_500,
 )
 from bumblebee.core.permissions import IsCommentOwner
+from bumblebee.notifications.choices import ACTION_TYPE, CONTENT_TYPE
+from bumblebee.notifications.utils import create_notification, delete_notification
 
-
-from bumblebee.comments.utils import (
-    get_comment_from_commentid_or_raise,
-    get_comments_from_commentid_list,
-)
 from ..serializers.comment_serializers import (
     CommentDetailSerializer,
     CreateCommentSerializer,
@@ -74,7 +75,7 @@ class BuzzOrRebuzzCommentListView(APIView):
         """ """
 
         if url_rebuzzid:
-            rebuzz_instance = get_rebuzz_from_rebuzzid_or_raise(buzzid=url_rebuzzid)
+            rebuzz_instance = get_rebuzz_from_rebuzzid_or_raise(rebuzzid=url_rebuzzid)
 
             if rebuzz_instance.author.profile.private:
                 raise PermissionDenied(
@@ -157,32 +158,32 @@ class CommentReplyListView(APIView):
                 commentid=url_commentid
             )
 
-            if comment_instance.parent_buzz:
-                if comment_instance.parent_buzz.author.profile.private:
-                    raise PermissionDenied(
-                        detail="Private Profile",
-                        code="User has made their profile private.",
-                    )
+            # if comment_instance.parent_buzz:
+            #     if comment_instance.parent_buzz.author.profile.private:
+            #         raise PermissionDenied(
+            #             detail="Private Profile",
+            #             code="User has made their profile private.",
+            #         )
 
-            elif comment_instance.parent_buzz:
-                if comment_instance.parent_rebuzz.author.profile.private:
-                    raise PermissionDenied(
-                        detail="Private Profile",
-                        code="User has made their profile private.",
-                    )
+            # elif comment_instance.parent_buzz:
+            #     if comment_instance.parent_rebuzz.author.profile.private:
+            #         raise PermissionDenied(
+            #             detail="Private Profile",
+            #             code="User has made their profile private.",
+            #         )
 
-            if comment_instance.parent_buzz:
-                if comment_instance.parent_buzz.privacy == "priv":
-                    raise PermissionDenied(
-                        detail="Private Buzz",
-                        code="User has made their buzz private.",
-                    )
-            elif comment_instance.parent_buzz:
-                if comment_instance.parent_rebuzz.privacy == "priv":
-                    raise PermissionDenied(
-                        detail="Private ReBuzz",
-                        code="User has made their rebuzz private.",
-                    )
+            # if comment_instance.parent_buzz:
+            #     if comment_instance.parent_buzz.privacy == "priv":
+            #         raise PermissionDenied(
+            #             detail="Private Buzz",
+            #             code="User has made their buzz private.",
+            #         )
+            # elif comment_instance.parent_buzz:
+            #     if comment_instance.parent_rebuzz.privacy == "priv":
+            #         raise PermissionDenied(
+            #             detail="Private ReBuzz",
+            #             code="User has made their rebuzz private.",
+            #         )
 
             return comment_instance
 
@@ -261,17 +262,17 @@ class CommentDetailView(APIView):
                 commentid=url_commentid
             )
 
-            if comment_instance.parent_buzz.author.profile.private:
-                raise PermissionDenied(
-                    detail="Private Profile",
-                    code="User has made their profile private.",
-                )
+            # if comment_instance.parent_buzz.author.profile.private:
+            #     raise PermissionDenied(
+            #         detail="Private Profile",
+            #         code="User has made their profile private.",
+            #     )
 
-            if comment_instance.parent_buzz.privacy == "priv":
-                raise PermissionDenied(
-                    detail="Private Buzsz",
-                    code="User has made their buzz private.",
-                )
+            # if comment_instance.parent_buzz.privacy == "priv":
+            #     raise PermissionDenied(
+            #         detail="Private Buzz",
+            #         code="User has made their buzz private.",
+            #     )
 
             return comment_instance
 
@@ -341,6 +342,11 @@ class CreateCommentView(APIView):
                     detail="Private Profile",
                     code="User has made their profile private.",
                 )
+            if buzz_instance.privacy == "priv":
+                raise PermissionDenied(
+                    detail="Private Buzz",
+                    code="User has made their buzz private.",
+                )
 
             return buzz_instance
 
@@ -358,12 +364,17 @@ class CreateCommentView(APIView):
         """ """
 
         if url_rebuzzid:
-            rebuzz_instance = get_rebuzz_from_rebuzzid_or_raise(buzzid=url_rebuzzid)
+            rebuzz_instance = get_rebuzz_from_rebuzzid_or_raise(rebuzzid=url_rebuzzid)
 
             if rebuzz_instance.author.profile.private:
                 raise PermissionDenied(
                     detail="Private Profile",
                     code="User has made their profile private.",
+                )
+            if rebuzz_instance.privacy == "priv":
+                raise PermissionDenied(
+                    detail="Private Rebuzz",
+                    code="User has made their rebuzz private.",
                 )
 
             return rebuzz_instance
@@ -389,8 +400,6 @@ class CreateCommentView(APIView):
                 data, ["content", "images"]
             )
 
-            data["level"] = 1
-
             serializer = self.serializer_class(data=data)
             serializer.is_valid(raise_exception=True)
 
@@ -402,7 +411,19 @@ class CreateCommentView(APIView):
                 created_comment = serializer.save(
                     commenter=request.user,
                     parent_buzz=buzz_instance,
+                    level=1,
                     **serializer.validated_data,
+                )
+                interaction = buzz_instance.buzz_interaction
+                interaction.comments.append(created_comment.id)
+
+                # create notification
+                create_notification(
+                    ACTION_TYPE["CMNT"],
+                    CONTENT_TYPE["BUZZ"],
+                    request.user,
+                    buzz_instance,
+                    created_comment,
                 )
 
             elif url_rebuzzid:
@@ -411,6 +432,17 @@ class CreateCommentView(APIView):
                     commenter=request.user,
                     parent_rebuzz=rebuzz_instance,
                     **serializer.validated_data,
+                )
+                interaction = rebuzz_instance.rebuzz_interaction
+                interaction.comments.append(created_comment.id)
+
+                # create notification
+                create_notification(
+                    ACTION_TYPE["CMNT"],
+                    CONTENT_TYPE["RBZ"],
+                    request.user,
+                    rebuzz_instance,
+                    created_comment,
                 )
 
             return Response(
@@ -467,23 +499,22 @@ class CreateCommentReplyView(APIView):
                         code="User has made their profile private.",
                     )
 
-            elif comment_instance.parent_buzz:
+                if comment_instance.parent_buzz.privacy == "priv":
+                    raise PermissionDenied(
+                        detail="Private Buzz",
+                        code="User has made their buzz private.",
+                    )
+
+            elif comment_instance.parent_rebuzz:
                 if comment_instance.parent_rebuzz.author.profile.private:
                     raise PermissionDenied(
                         detail="Private Profile",
                         code="User has made their profile private.",
                     )
 
-            if comment_instance.parent_buzz:
-                if comment_instance.parent_buzz.privacy == "priv":
-                    raise PermissionDenied(
-                        detail="Private Buzz",
-                        code="User has made their buzz private.",
-                    )
-            elif comment_instance.parent_buzz:
                 if comment_instance.parent_rebuzz.privacy == "priv":
                     raise PermissionDenied(
-                        detail="Private ReBuzz",
+                        detail="Private Rebuzz",
                         code="User has made their rebuzz private.",
                     )
 
@@ -510,7 +541,6 @@ class CreateCommentReplyView(APIView):
             )
 
             parent_comment = self._get_url_comment(**kwargs)
-            data["level"] = parent_comment.level + 1
 
             serializer = self.serializer_class(data=data)
             serializer.is_valid(raise_exception=True)
@@ -520,11 +550,21 @@ class CreateCommentReplyView(APIView):
                 parent_buzz=parent_comment.parent_buzz,
                 parent_rebuzz=parent_comment.parent_rebuzz,
                 parent_comment=parent_comment.id,
+                level=parent_comment.level + 1,
                 **serializer.validated_data,
             )
 
             parent_comment.comment_interaction.replies.append(created_comment.id)
             parent_comment.comment_interaction.save()
+
+            # create notification
+            create_notification(
+                ACTION_TYPE["RPLY"],
+                CONTENT_TYPE["CMNT"],
+                request.user,
+                parent_comment,
+                created_comment,
+            )
 
             return Response(
                 create_200(
@@ -583,32 +623,32 @@ class EditCommentView(APIView):
                 commentid=url_commentid
             )
 
-            if comment_instance.parent_buzz:
-                if comment_instance.parent_buzz.author.profile.private:
-                    raise PermissionDenied(
-                        detail="Private Profile",
-                        code="User has made their profile private.",
-                    )
+            # if comment_instance.parent_buzz:
+            #     if comment_instance.parent_buzz.author.profile.private:
+            #         raise PermissionDenied(
+            #             detail="Private Profile",
+            #             code="User has made their profile private.",
+            #         )
 
-            elif comment_instance.parent_buzz:
-                if comment_instance.parent_rebuzz.author.profile.private:
-                    raise PermissionDenied(
-                        detail="Private Profile",
-                        code="User has made their profile private.",
-                    )
+            # elif comment_instance.parent_rebuzz:
+            #     if comment_instance.parent_rebuzz.author.profile.private:
+            #         raise PermissionDenied(
+            #             detail="Private Profile",
+            #             code="User has made their profile private.",
+            #         )
 
-            if comment_instance.parent_buzz:
-                if comment_instance.parent_buzz.privacy == "priv":
-                    raise PermissionDenied(
-                        detail="Private Buzz",
-                        code="User has made their buzz private.",
-                    )
-            elif comment_instance.parent_buzz:
-                if comment_instance.parent_rebuzz.privacy == "priv":
-                    raise PermissionDenied(
-                        detail="Private ReBuzz",
-                        code="User has made their rebuzz private.",
-                    )
+            # if comment_instance.parent_buzz:
+            #     if comment_instance.parent_buzz.privacy == "priv":
+            #         raise PermissionDenied(
+            #             detail="Private Buzz",
+            #             code="User has made their buzz private.",
+            #         )
+            # elif comment_instance.parent_buzz:
+            #     if comment_instance.parent_rebuzz.privacy == "priv":
+            #         raise PermissionDenied(
+            #             detail="Private ReBuzz",
+            #             code="User has made their rebuzz private.",
+            #         )
 
             return comment_instance
 
@@ -638,7 +678,9 @@ class EditCommentView(APIView):
 
             serializer = self.serializer_class(data=data)
             serializer.is_valid(raise_exception=True)
-            serializer.update_comment(comment_to_update, **serializer.validated_data)
+            serializer.update_comment(
+                comment_to_update, edited=True, **serializer.validated_data
+            )
 
             return Response(
                 create_200(
@@ -649,7 +691,7 @@ class EditCommentView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        except (UrlParameterError, NoneExistenceError) as error:
+        except (ExtraFieldsError, UrlParameterError, NoneExistenceError) as error:
             return Response(error.message, status=error.message.get("status"))
 
         except (PermissionDenied, NotAuthenticated) as error:

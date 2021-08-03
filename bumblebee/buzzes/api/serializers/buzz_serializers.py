@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
-from bumblebee.buzzes.models import Buzz, BuzzImage
-from bumblebee.core.exceptions import UnknownModelFieldsError
 from bumblebee.buzzes.api.serializers.interaction_serializers import (
     BuzzInteractionsSerializer,
 )
+from bumblebee.buzzes.models import Buzz, BuzzImage
+from bumblebee.core.exceptions import UnknownModelFieldsError
 
 from .user_serializers import BuzzUserSerializer
 
@@ -52,6 +52,10 @@ class BuzzDetailSerializer(serializers.ModelSerializer):
     images = ListBuzzImageSerializer(source="buzz_image", many=True, read_only=True)
     interaction = BuzzInteractionsSerializer(source="buzz_interaction", read_only=True)
 
+
+    sentiment_value = serializers.FloatField() 
+    textblob_value = serializers.FloatField()
+
     class Meta:
         model = Buzz
         fields = [
@@ -66,6 +70,8 @@ class BuzzDetailSerializer(serializers.ModelSerializer):
             "author",
             "images",
             "interaction",
+            "sentiment_value",
+            "textblob_value",
         ]
 
 
@@ -147,6 +153,10 @@ class BuzzListSerializer(serializers.Serializer):
     flair = serializers.ListField()
     images = ListBuzzImageSerializer(source="buzz_image", many=True, read_only=True)
     interaction = BuzzInteractionsSerializer(source="buzz_interaction", read_only=True)
+    
+    sentiment_value = serializers.FloatField() 
+    textblob_value = serializers.FloatField()
+
 
     class Meta:
         """ """
@@ -163,5 +173,7 @@ class BuzzListSerializer(serializers.Serializer):
             "flair",
             "images",
             "interaction",
+            "sentiment_value",
+            "textblob_value",
         ]
         # depth = 1

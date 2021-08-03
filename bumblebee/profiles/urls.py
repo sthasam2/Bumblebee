@@ -1,11 +1,13 @@
 from django.urls import path
 
 from bumblebee.profiles.api.views import (
+    ChangePrivateProfileView,
+    EnableDisablePersonaView,
     ProfileDetailView,
     ProfileImageUploadView,
     ProfileSummaryView,
+    SetPersonaView,
     UpdateProfileView,
-    ChangePrivateProfileView,
 )
 
 from .models import Profile
@@ -25,6 +27,16 @@ urlpatterns = [
         "update/user=<slug:username>",
         UpdateProfileView.as_view(),
         name="update-profile",
+    ),
+    path(
+        "enable_disable_persona/user=<slug:username>",
+        EnableDisablePersonaView.as_view(),
+        name="update-profile-use-persona",
+    ),
+    path(
+        "set_persona/user=<slug:username>",
+        SetPersonaView.as_view(),
+        name="update-profile-use-persona",
     ),
     path(
         "change_private/user=<slug:username>",

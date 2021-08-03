@@ -38,6 +38,10 @@ class CommentDetailSerializer(serializers.ModelSerializer):
     parent_rebuzz = serializers.PrimaryKeyRelatedField(read_only=True)
     parent_comment = serializers.PrimaryKeyRelatedField(read_only=True)
 
+    sentiment_value = serializers.FloatField() 
+    textblob_value = serializers.FloatField()
+
+
     class Meta:
         model = Comment
         fields = [
@@ -54,6 +58,8 @@ class CommentDetailSerializer(serializers.ModelSerializer):
             "parent_buzz",
             "parent_rebuzz",
             "parent_comment",
+            "sentiment_value",
+            "textblob_value",
         ]
 
 
@@ -71,8 +77,8 @@ class CreateCommentSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(
         required=False, help_text="Need a Visual feedback? Add an image"
     )
-    flair = serializers.ListField(child=serializers.CharField())
-    level = serializers.IntegerField(required=True)
+    flair = serializers.ListField(child=serializers.CharField(), required=False)
+    level = serializers.IntegerField(required=False)
 
     class Meta:
         model = Comment
@@ -95,10 +101,11 @@ class EditCommentSerializer(serializers.ModelSerializer):
     content = serializers.CharField(
         required=False, help_text="Something in your mind? Post a buzz"
     )
+    flair = serializers.ListField(child=serializers.CharField(), required=False)
 
     class Meta:
         model = Comment
-        fields = ["content"]
+        fields = ["content", "flair"]
 
     def update_comment(self, comment_instance, **validated_data):
         """ """

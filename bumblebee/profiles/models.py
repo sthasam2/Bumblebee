@@ -2,6 +2,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from bumblebee.users.models import CustomUser
+
 from .validators import validate_date_lt_today
 
 
@@ -15,6 +16,8 @@ class Profile(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
 
     account_verified = models.BooleanField(default=False)
+
+    use_persona = models.BooleanField(default=True)
 
     persona = models.PositiveIntegerField(default=1)
     avatar = models.ImageField(default="default.png", upload_to="avatar/")

@@ -189,13 +189,17 @@ class BuzzDetailView(APIView):
     def _get_buzz(self, *args, **kwargs):
         """Get Buzz"""
         url_buzz = get_buzz_from_buzzid_or_raise(**kwargs)
-        if url_buzz.privacy != "pub":
-            raise PermissionDenied(
-                detail="Buzz not Public",
-                code="User has made not made their buzz public.",
-            )
-        else:
+        if self.request.user == url_buzz.author:
             return url_buzz
+
+        else:
+            if url_buzz.privacy != "pub":
+                raise PermissionDenied(
+                    detail="Buzz not Public",
+                    code="User has not made their buzz public.",
+                )
+            else:
+                return url_buzz
 
     def get(self, request, *args, **kwargs):
         """ """
