@@ -42,7 +42,7 @@ class AbstractBuzz(models.Model):
     location = models.CharField(max_length=500, blank=True, null=True)
     flair = ArrayField(models.CharField(max_length=100), blank=True, default=list)
 
-    sentiment_value = models.FloatField(null=True, blank=True) 
+    sentiment_value = models.FloatField(null=True, blank=True)
     textblob_value = models.FloatField(null=True, blank=True)
 
     class Meta:

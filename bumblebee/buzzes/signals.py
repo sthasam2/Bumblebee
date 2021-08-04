@@ -8,6 +8,10 @@ from bumblebee.notifications.models.grouped_models import (
     BuzzNotification,
     RebuzzNotification,
 )
+from bumblebee.sentiment_analysis.utils import (
+    calculate_sentiment_index,
+    calculate_textblob_value,
+)
 
 from .models import Buzz, BuzzInteractions, Rebuzz, RebuzzInteractions
 
@@ -30,6 +34,10 @@ def post_save_create_interaction_activity(sender, instance, created, **kwargs):
             instance.id,
         )
 
+    instance.sentiment_value = calculate_sentiment_index(instance.content)
+    instance.textblob_value = calculate_textblob_value(instance.content)
+    instance.save()
+
 
 @receiver(post_save, sender=Rebuzz)
 def post_save_create_interaction_activity(sender, instance, created, **kwargs):
@@ -44,6 +52,10 @@ def post_save_create_interaction_activity(sender, instance, created, **kwargs):
             ContentType.objects.get_for_model(instance),
             instance.id,
         )
+
+    instance.sentiment_value = calculate_sentiment_index(instance.content)
+    instance.textblob_value = calculate_textblob_value(instance.content)
+    instance.save()
 
 
 #########################################

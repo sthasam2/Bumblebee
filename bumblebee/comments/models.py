@@ -45,7 +45,7 @@ class AbstractComment(models.Model):
         on_delete=models.CASCADE,
     )
 
-    sentiment_value = models.FloatField(null=True, blank=True) 
+    sentiment_value = models.FloatField(null=True, blank=True)
     textblob_value = models.FloatField(null=True, blank=True)
 
     class Meta:

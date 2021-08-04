@@ -1,10 +1,15 @@
 # Changelogs
 
-## v.0.2.2: Bugg Fixes
+## v.0.3: Integration of ML model, Bug Fixes
+
+1. Integrated Machine learning model (Logreg, NaiBay) as well as the popular TextBlob
+2. Bug Fixes
+
+## v.0.2.2: Bug Fixes
 
 1. Bug Fixes
 
-## v.0.2.1: Bugg Fixes, template View
+## v.0.2.1: Bug Fixes, template View
 
 1. Added HTML template view for Email verification
 2. Bug Fixes

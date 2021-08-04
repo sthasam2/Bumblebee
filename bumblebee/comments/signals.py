@@ -4,7 +4,10 @@ from django.dispatch import receiver
 
 from bumblebee.activities.models import UserActivity
 from bumblebee.activities.utils import _create_activity
-
+from bumblebee.sentiment_analysis.utils import (
+    calculate_sentiment_index,
+    calculate_textblob_value,
+)
 from .models import Comment, CommentInteractions
 
 
@@ -22,6 +25,10 @@ def post_save_create_interaction_activity(sender, instance, created, **kwargs):
             ContentType.objects.get_for_model(instance),
             instance.id,
         )
+
+    instance.sentiment_value = calculate_sentiment_index(instance.content)
+    instance.textblob_value = calculate_textblob_value(instance.content)
+    instance.save()
 
 
 @receiver(post_save, sender=CommentInteractions)

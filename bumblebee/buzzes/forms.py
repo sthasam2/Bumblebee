@@ -15,7 +15,16 @@ class BuzzAdminCreationForm(forms.ModelForm):
 
     class Meta:
         model = Buzz
-        fields = ["author", "privacy", "content", "image", "location", "flair"]
+        fields = [
+            "author",
+            "privacy",
+            "content",
+            "image",
+            "location",
+            "flair",
+            "sentiment_value",
+            "textblob_value",
+        ]
 
 
 class BuzzAdminForm(forms.ModelForm):
@@ -29,4 +38,13 @@ class BuzzAdminForm(forms.ModelForm):
 
     class Meta:
         model = Buzz
-        fields = ["author", "privacy", "content", "image", "location", "flair"]
+        fields = [
+            "author",
+            "privacy",
+            "content",
+            "image",
+            "location",
+            "flair",
+            "sentiment_value",
+            "textblob_value",
+        ]

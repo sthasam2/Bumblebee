@@ -41,6 +41,7 @@ LOCAL_APPS = [
     "bumblebee.feeds.apps.FeedsConfig",
     "bumblebee.notifications.apps.NotificationsConfig",
     "bumblebee.profiles.apps.ProfilesConfig",
+    "bumblebee.sentiment_analysis.apps.SentimentAnalysisConfig",
     "bumblebee.users.apps.UsersConfig",
 ]
 
