@@ -145,9 +145,10 @@ class UpdateProfileView(APIView):
     permission_classes = [
         IsAuthenticated,
         IsProfileOwner,
-        IsProfilePasswordMatching,
+        # IsProfilePasswordMatching,
     ]
-    required_fields = ["current_password"]
+    required_fields = None
+    # required_fields = ["current_password"]
     field_options = [
         "bio",
         "name",
@@ -157,6 +158,7 @@ class UpdateProfileView(APIView):
         "phone",
         "use_persona",
         "persona",
+        "current_password",
     ]
 
     def patch(self, request, *args, **kwargs):
@@ -225,10 +227,11 @@ class ChangePrivateProfileView(APIView):
     permission_classes = [
         IsAuthenticated,
         IsProfileOwner,
-        IsProfilePasswordMatching,
+        # IsProfilePasswordMatching,
     ]
-    required_fields = ["current_password"]
-    field_options = None
+    required_fields = None
+    # required_fields = ["current_password"]
+    field_options = ["current_password"]
 
     def post(self, request, *args, **kwargs):
         """ """
@@ -385,10 +388,12 @@ class EnableDisablePersonaView(APIView):
     permission_classes = [
         IsAuthenticated,
         IsProfileOwner,
-        IsProfilePasswordMatching,
+        # IsProfilePasswordMatching,
     ]
-    required_fields = ["current_password"]
+    required_fields = None
     field_options = None
+    # required_fields = ["current_password"]
+    # field_options = ["current_password"]
 
     def patch(self, request, *args, **kwargs):
         """ """
@@ -462,9 +467,12 @@ class SetPersonaView(APIView):
     permission_classes = [
         IsAuthenticated,
         IsProfileOwner,
-        IsProfilePasswordMatching,
+        # IsProfilePasswordMatching,
     ]
-    required_fields = ["current_password"]
+    required_fields = [
+        # "current_password",
+        "persona"
+    ]
     field_options = ["persona"]
 
     def patch(self, request, *args, **kwargs):

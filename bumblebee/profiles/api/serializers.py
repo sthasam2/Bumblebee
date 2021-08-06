@@ -179,9 +179,18 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
     )
     current_password = serializers.CharField(
         write_only=True,
-        required=True,
+        required=False,
+        # required=True,
         help_text="Current password ",
         style={"input_type": "password", "placeholder": "Current Password"},
+    )
+    use_persona = serializers.BooleanField(
+        required=False,
+        help_text="Enable Diable Persona",
+    )
+    persona = serializers.IntegerField(
+        required=False,
+        help_text="The persona to use",
     )
 
     class Meta:
@@ -194,12 +203,15 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
             "location",
             "phone",
             "current_password",
+            "use_persona",
+            "persona",
         ]
 
     def update_profile(self, profile_instance, **validated_data):
         """ """
         try:
-            validated_data.pop("current_password")
+            if validated_data.get("current_password", False):
+                validated_data.pop("current_password")
             for key, value in validated_data.items():
                 if profile_instance.__dict__.__contains__(key):
                     if profile_instance.__getattribute__(key) != value:
@@ -226,7 +238,8 @@ class ChangePrivateProfileSerializer(serializers.ModelSerializer):
 
     current_password = serializers.CharField(
         write_only=True,
-        required=True,
+        required=False,
+        # required=True,
         help_text="Current password ",
         style={"input_type": "password", "placeholder": "Current Password"},
     )
