@@ -1,5 +1,10 @@
 # Changelogs
 
+## v.0.3.1: Added Crosssite origin access, Bug Fixes
+
+1. Added Crosssite origin access
+2. Bug Fixes
+
 ## v.0.3: Integration of ML model, Bug Fixes
 
 1. Integrated Machine learning model (Logreg, NaiBay) as well as the popular TextBlob
