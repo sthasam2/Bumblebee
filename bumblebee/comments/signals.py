@@ -26,9 +26,9 @@ def post_save_create_interaction_activity(sender, instance, created, **kwargs):
             instance.id,
         )
 
-    instance.sentiment_value = calculate_sentiment_index(instance.content)
-    instance.textblob_value = calculate_textblob_value(instance.content)
-    instance.save()
+        instance.sentiment_value = calculate_sentiment_index(instance.content)
+        instance.textblob_value = calculate_textblob_value(instance.content)
+        instance.save()
 
 
 @receiver(post_save, sender=CommentInteractions)

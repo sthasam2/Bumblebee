@@ -1,5 +1,9 @@
 from rest_framework import status
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.exceptions import (
+    AuthenticationFailed,
+    NotAuthenticated,
+    PermissionDenied,
+)
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -59,9 +63,7 @@ class UserBuzzListView(APIView):
             raise UrlParameterError(
                 "username",
                 create_400(
-                    400,
-                    "Url Error",
-                    "Url must contain `username`",
+                    400, "Url Error", "Url must contain `username`", "url:username"
                 ),
             )
 
@@ -334,7 +336,7 @@ class CreateBuzzView(APIView):
         ) as error:
             return Response(error.message, status=error.message.get("status"))
 
-        except (PermissionDenied, NotAuthenticated) as error:
+        except (PermissionDenied, NotAuthenticated, AuthenticationFailed) as error:
             return Response(
                 create_400(
                     error.status_code,

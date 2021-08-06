@@ -27,9 +27,10 @@ def get_buzz_from_buzzid_or_raise(**kwargs):
             raise NoneExistenceError(
                 url_buzzid,
                 create_400(
-                    400,
+                    404,
                     "Non existence",
                     f"Buzz with id {url_buzzid} credentials does not exist!",
+                    "buzz",
                 ),
             )
     else:
@@ -39,6 +40,7 @@ def get_buzz_from_buzzid_or_raise(**kwargs):
                 status.HTTP_400_BAD_REQUEST,
                 "Url parameter wrong",
                 "`buzzid` must be provided",
+                "url:buzzid",
             ),
         )
 
@@ -55,9 +57,10 @@ def get_buzz_interaction_from_buzzid_or_raise(**kwargs):
             raise NoneExistenceError(
                 url_buzzid,
                 create_400(
-                    400,
+                    404,
                     "Non existence",
                     f"Buzz with id {url_buzzid} credentials does not exist!",
+                    "buzz",
                 ),
             )
     else:
@@ -67,6 +70,7 @@ def get_buzz_interaction_from_buzzid_or_raise(**kwargs):
                 status.HTTP_400_BAD_REQUEST,
                 "Url parameter wrong",
                 "`buzzid` must be provided",
+                "url:buzzid",
             ),
         )
 
@@ -83,9 +87,10 @@ def get_buzz_images_from_buzzid_or_raise(**kwargs):
             raise NoneExistenceError(
                 url_buzzid,
                 create_400(
-                    400,
+                    404,
                     "Non existence",
                     f"Buzz with id {url_buzzid} credentials does not exist!",
+                    "buzz",
                 ),
             )
     else:
@@ -95,6 +100,7 @@ def get_buzz_images_from_buzzid_or_raise(**kwargs):
                 status.HTTP_400_BAD_REQUEST,
                 "Url parameter wrong",
                 "`buzzid` must be provided",
+                "url:buzzid",
             ),
         )
 
@@ -111,9 +117,10 @@ def get_rebuzz_from_rebuzzid_or_raise(**kwargs):
             raise NoneExistenceError(
                 url_rebuzzid,
                 create_400(
-                    400,
+                    404,
                     "Non existence",
                     f"Rebuzz with id {url_rebuzzid} credentials does not exist!",
+                    "rebuzz",
                 ),
             )
     else:
@@ -123,6 +130,7 @@ def get_rebuzz_from_rebuzzid_or_raise(**kwargs):
                 status.HTTP_400_BAD_REQUEST,
                 "Url parameter wrong",
                 "`buzzid` must be provided",
+                "url:buzzid",
             ),
         )
 
@@ -139,9 +147,10 @@ def get_rebuzz_interaction_from_rebuzzid_or_raise(**kwargs):
             raise NoneExistenceError(
                 url_rebuzzid,
                 create_400(
-                    400,
+                    404,
                     "Non existence",
                     f"Rebuzz with id {url_rebuzzid} credentials does not exist!",
+                    "rebuzz",
                 ),
             )
     else:
@@ -151,6 +160,7 @@ def get_rebuzz_interaction_from_rebuzzid_or_raise(**kwargs):
                 status.HTTP_400_BAD_REQUEST,
                 "Url parameter wrong",
                 "`rebuzzid` must be provided",
+                "url:rebuzzid",
             ),
         )
 
@@ -167,9 +177,10 @@ def get_rebuzz_images_from_rebuzzid_or_raise(**kwargs):
             raise NoneExistenceError(
                 url_rebuzzid,
                 create_400(
-                    400,
+                    404,
                     "Non existence",
                     f"Rebuzz with id {url_rebuzzid} credentials does not exist!",
+                    "rebuzz",
                 ),
             )
     else:
@@ -179,6 +190,7 @@ def get_rebuzz_images_from_rebuzzid_or_raise(**kwargs):
                 status.HTTP_400_BAD_REQUEST,
                 "Url parameter wrong",
                 "`rebuzzid` must be provided",
+                "url:rebuzzid",
             ),
         )
 
@@ -252,7 +264,6 @@ def delete_buzz_upvdwv_meta(comment_interaction, userid, action):
             Q(userid=userid),
             Q(action=RebuzzUpvoteDownvoteMeta.ActionChoices.DOWNVOTE),
         ).delete()
-
 
 
 def check_previously_rebuzzed(user, buzzid):

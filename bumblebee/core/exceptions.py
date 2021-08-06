@@ -6,7 +6,7 @@ from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 
 class Error(Exception):
     """
-    Common base for all exceptions
+    Common base for all exceptions @Error
     """
 
     pass
@@ -152,6 +152,12 @@ class PermissionDeniedError(PermissionDenied):
 
 
 class NotAuthenticatedError(NotAuthenticated):
+    """ """
+
+    pass
+
+
+class CustomAuthenticationFailed(CustomBaseError):
     """ """
 
     pass
