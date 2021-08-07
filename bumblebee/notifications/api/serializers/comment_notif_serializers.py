@@ -148,8 +148,7 @@ class UpvoteCommentIndividualNotificationSerializer(serializers.ModelSerializer)
             "contenttype",
             "action",
             "timestamp",
-            "agent_username",
-            "agent_id",
+            "agent",
             "notification",
         ]
 
@@ -177,8 +176,7 @@ class DownvoteCommentIndividualNotificationSerializer(serializers.ModelSerialize
             "contenttype",
             "action",
             "timestamp",
-            "agent_username",
-            "agent_id",
+            "agent",
             "notification",
         ]
 
@@ -206,8 +204,7 @@ class ReplyCommentIndividualNotificationSerializer(serializers.ModelSerializer):
             "contenttype",
             "action",
             "timestamp",
-            "agent_username",
-            "agent_id",
+            "agent",
             "notification",
         ]
 

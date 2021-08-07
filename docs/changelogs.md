@@ -1,5 +1,9 @@
 # Changelogs
 
+## v.0.3.2.4: Bug Fixes
+
+1.  Bug Fixes
+
 ## v.0.3.2.3: Bug Fixes
 
 1.  Bug Fixes

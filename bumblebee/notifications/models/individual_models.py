@@ -312,10 +312,7 @@ class NewFollowerNotification(BaseNotification):
         verbose_name = "New Follower Notification"
 
     def __str__(self):
-        return f"New Follower Notification- id:{self.user.id}"
-
-    def get_follower_notification(self):
-        return f"{self.follower.username} followed you."
+        return f"{self.follower.username} followed you"
 
 
 class NewFollowerRequestNotification(BaseNotification):
@@ -337,9 +334,6 @@ class NewFollowerRequestNotification(BaseNotification):
         verbose_name = "New Follower Request Notification"
 
     def __str__(self):
-        return f"New Follower Request Notification- id:{self.user.id}"
-
-    def get_follower_request_notification(self):
         return f"{self.follow_requester.username} requiested to followed you."
 
 
@@ -362,9 +356,6 @@ class AcceptedFollowerRequestNotification(BaseNotification):
         verbose_name = "Follower Accept Request Notification"
 
     def __str__(self):
-        return f"Follower Accept Request Notification- id:{self.user.id}"
-
-    def get_follower_request_accept_notification(self):
         return (
             f"{self.follow_requester.username} accepted your request to followed them"
         )
@@ -389,7 +380,4 @@ class RejectedFollowerRequestNotification(BaseNotification):
         verbose_name = "Follower Reject Request Notification"
 
     def __str__(self):
-        return f"Follower Reject Request Notification- id:{self.user.id}"
-
-    def get_follower_request_reject_notification(self):
         return f"{self.follow_requester.username} rejected your request to follow them"
