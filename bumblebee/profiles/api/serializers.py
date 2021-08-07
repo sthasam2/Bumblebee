@@ -72,6 +72,18 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
             "blocked_count",
         ]
 
+    def get_followers_count(self, obj):
+        return len(obj.user.user_follower.follower)
+
+    def get_following_count(self, obj):
+        return len(obj.user.user_following.following)
+
+    def get_muted_count(self, obj):
+        return len(obj.user.user_muted.muted)
+
+    def get_blocked_count(self, obj):
+        return len(obj.user.user_blocked.blocked)
+
 
 class ProfilePublicSerializer(serializers.ModelSerializer):
     """ """
@@ -130,6 +142,12 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
             "following_count",
         ]
 
+    def get_followers_count(self, obj):
+        return len(obj.user.user_follower.follower)
+
+    def get_following_count(self, obj):
+        return len(obj.user.user_following.following)
+
 
 class ProfilePrivateSerializer(serializers.Serializer):
     """ """
@@ -157,18 +175,6 @@ class ProfilePrivateSerializer(serializers.Serializer):
             "nickname",
             "private",
         ]
-
-        def get_followers_count(self, obj):
-            return len(obj.user.user_follower.follower)
-
-        def get_following_count(self, obj):
-            return len(obj.user.user_following.following)
-
-        def get_muted_count(self, obj):
-            return len(obj.user.user_muted.muted)
-
-        def get_blocked_count(self, obj):
-            return len(obj.user.user_blocked.blocked)
 
 
 class ProfileSummarySerializer(ProfilePrivateSerializer):

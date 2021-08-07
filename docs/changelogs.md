@@ -1,5 +1,9 @@
 # Changelogs
 
+## v.0.3.2.3: Bug Fixes
+
+1.  Bug Fixes
+
 ## v.0.3.2.2: Profile Serializer modifications, Bug fixes
 
 1. Modified profile serializers to display connection counts
