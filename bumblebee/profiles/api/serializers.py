@@ -39,6 +39,12 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
         help_text="Contact number verified",
     )
     private = serializers.BooleanField(help_text="Profile Privacy")
+    # notifications
+    #  connections
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    muted_count = serializers.SerializerMethodField()
+    blocked_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -60,6 +66,10 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
             "phone",
             "phone_verified",
             "private",
+            "followers_count",
+            "following_count",
+            "muted_count",
+            "blocked_count",
         ]
 
 
@@ -95,6 +105,10 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
     phone_verified = serializers.BooleanField(
         help_text="Contact number verified",
     )
+    # notifications
+    #  connections
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -112,6 +126,8 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
             "location",
             "phone",
             "phone_verified",
+            "followers_count",
+            "following_count",
         ]
 
 
@@ -141,6 +157,18 @@ class ProfilePrivateSerializer(serializers.Serializer):
             "nickname",
             "private",
         ]
+
+        def get_followers_count(self, obj):
+            return len(obj.user.user_follower.follower)
+
+        def get_following_count(self, obj):
+            return len(obj.user.user_following.following)
+
+        def get_muted_count(self, obj):
+            return len(obj.user.user_muted.muted)
+
+        def get_blocked_count(self, obj):
+            return len(obj.user.user_blocked.blocked)
 
 
 class ProfileSummarySerializer(ProfilePrivateSerializer):

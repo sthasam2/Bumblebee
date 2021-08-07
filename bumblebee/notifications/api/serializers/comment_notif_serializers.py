@@ -10,6 +10,7 @@ from bumblebee.notifications.models.individual_models import (
     ReplyCommentNotification,
     UpvoteCommentNotification,
 )
+from bumblebee.notifications.api.serializers.user_serializers import UserSerializer
 
 ######################################
 ##           RETRIEVE
@@ -136,8 +137,8 @@ class UpvoteCommentIndividualNotificationSerializer(serializers.ModelSerializer)
     contenttype = serializers.CharField(default="Comment")
     action = serializers.CharField(default="Upvoted")
     timestamp = serializers.DateTimeField()
-    agent_username = serializers.CharField(source="agent.username")
-    agent_id = serializers.CharField(source="agent.id")
+
+    agent = UserSerializer()
     notification = serializers.SerializerMethodField()
 
     class Meta:
@@ -165,8 +166,7 @@ class DownvoteCommentIndividualNotificationSerializer(serializers.ModelSerialize
 
     timestamp = serializers.DateTimeField()
 
-    agent_username = serializers.CharField(source="agent.username")
-    agent_id = serializers.CharField(source="agent.id")
+    agent = UserSerializer()
 
     notification = serializers.SerializerMethodField()
 
@@ -195,8 +195,7 @@ class ReplyCommentIndividualNotificationSerializer(serializers.ModelSerializer):
 
     timestamp = serializers.DateTimeField()
 
-    agent_username = serializers.CharField(source="agent.username")
-    agent_id = serializers.CharField(source="agent.id")
+    agent = UserSerializer()
 
     notification = serializers.SerializerMethodField()
 

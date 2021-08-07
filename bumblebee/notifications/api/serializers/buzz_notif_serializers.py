@@ -11,6 +11,7 @@ from bumblebee.notifications.models.individual_models import (
     RebuzzBuzzNotification,
     UpvoteBuzzNotification,
 )
+from bumblebee.notifications.api.serializers.user_serializers import UserSerializer
 
 ######################################
 ##           GROUPED
@@ -167,8 +168,8 @@ class UpvoteBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
     contenttype = serializers.CharField(default="Buzz")
     action = serializers.CharField(default="Upvoted")
     timestamp = serializers.DateTimeField()
-    agent_username = serializers.CharField(source="agent.username")
-    agent_id = serializers.CharField(source="agent.id")
+
+    agent = UserSerializer()
     notification = serializers.SerializerMethodField()
 
     class Meta:
@@ -196,8 +197,7 @@ class DownvoteBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
 
     timestamp = serializers.DateTimeField()
 
-    agent_username = serializers.CharField(source="agent.username")
-    agent_id = serializers.CharField(source="agent.id")
+    agent = UserSerializer()
 
     notification = serializers.SerializerMethodField()
 
@@ -226,8 +226,7 @@ class RebuzzBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
 
     timestamp = serializers.DateTimeField()
 
-    agent_username = serializers.CharField(source="agent.username")
-    agent_id = serializers.CharField(source="agent.id")
+    agent = UserSerializer()
 
     notification = serializers.SerializerMethodField()
 
@@ -256,8 +255,7 @@ class CommentBuzzIndividualNotificationSerializer(serializers.ModelSerializer):
 
     timestamp = serializers.DateTimeField()
 
-    agent_username = serializers.CharField(source="agent.username")
-    agent_id = serializers.CharField(source="agent.id")
+    agent = UserSerializer()
 
     notification = serializers.SerializerMethodField()
 

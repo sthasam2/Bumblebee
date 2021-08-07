@@ -136,7 +136,7 @@ class RetrieveUserConnectionListView(APIView):
                 ),
             )
 
-    def _get_followers_from_idlist(self, connectionid_list, *args, **kwargs):
+    def _get_users_from_idlist(self, connectionid_list, *args, **kwargs):
         """ """
         return CustomUser.objects.filter(id__in=connectionid_list)
 
@@ -145,28 +145,34 @@ class RetrieveUserConnectionListView(APIView):
 
         try:
             user_instance = self._get_url_user()
-            follower = self._get_followers_from_idlist(
-                connectionid_list=user_instance.user_follower.follower
-            )
-            following = self._get_followers_from_idlist(
-                connectionid_list=user_instance.user_following.following
-            )
+
+            follower_ids = user_instance.user_follower.follower
+            following_ids = user_instance.user_following.following
+
+            follower = self._get_users_from_idlist(connectionid_list=follower_ids)
+            following = self._get_users_from_idlist(connectionid_list=following_ids)
 
             follower_serializer = ConnectionUserSerializer(follower, many=True)
             following_serializer = ConnectionUserSerializer(following, many=True)
 
             if user_instance == self.request.user:
-                muted = self._get_followers_from_idlist(
-                    connectionid_list=user_instance.user_muted.muted
-                )
-                blocked = self._get_followers_from_idlist(
-                    connectionid_list=user_instance.user_blocked.blocked
-                )
+                muted_ids = user_instance.user_muted.muted
+                blocked_ids = user_instance.user_blocked.blocked
+
+                muted = self._get_users_from_idlist(connectionid_list=muted_ids)
+                blocked = self._get_users_from_idlist(connectionid_list=blocked_ids)
+
                 muted_serializer = ConnectionUserSerializer(muted, many=True)
                 blocked_serializer = ConnectionUserSerializer(blocked, many=True)
 
                 return Response(
                     data=dict(
+                        # count
+                        follower_count=len(follower_ids),
+                        following_count=len(following_ids),
+                        muted_count=len(muted_ids),
+                        blocked_count=len(blocked_ids),
+                        # users
                         follower=follower_serializer.data,
                         following=following_serializer.data,
                         muted=muted_serializer.data,
@@ -178,6 +184,10 @@ class RetrieveUserConnectionListView(APIView):
             else:
                 return Response(
                     data=dict(
+                        # count
+                        follower_count=len(follower_ids),
+                        following_count=len(following_ids),
+                        #  users
                         follower=follower_serializer.data,
                         following=following_serializer.data,
                     ),

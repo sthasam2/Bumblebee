@@ -42,9 +42,7 @@ class UpvoteBuzzNotification(BaseNotification):
         verbose_name = "Buzz Upvote Notification"
 
     def __str__(self):
-        return (
-            f"{self.agent.username} upvoted buzz(id:{self.buzz.id}) on {self.timestamp}"
-        )
+        return f"{self.agent.username} upvoted your buzz"
 
 
 class DownvoteBuzzNotification(BaseNotification):
@@ -68,7 +66,7 @@ class DownvoteBuzzNotification(BaseNotification):
         verbose_name = "Buzz Downvote Notification"
 
     def __str__(self):
-        return f"{self.agent.username} downvoted buzz(id:{self.buzz.id}) on {self.timestamp}"
+        return f"{self.agent.username} downvoted your buzz"
 
 
 class CommentBuzzNotification(BaseNotification):
@@ -97,7 +95,7 @@ class CommentBuzzNotification(BaseNotification):
         verbose_name = "Buzz Comment Notification"
 
     def __str__(self):
-        return f"{self.agent.username} commented on buzz(id:{self.buzz.id}) on {self.timestamp}"
+        return f"{self.agent.username} commented on your buzz"
 
 
 class RebuzzBuzzNotification(BaseNotification):
@@ -124,7 +122,7 @@ class RebuzzBuzzNotification(BaseNotification):
         verbose_name = "Buzz Rebuzz Notification"
 
     def __str__(self):
-        return f"{self.agent.username} rebuzzed buzz(id:{self.buzz.id}) on {self.timestamp}"
+        return f"{self.agent.username} rebuzzed your buzz"
 
 
 #########################################
@@ -153,7 +151,7 @@ class UpvoteRebuzzNotification(BaseNotification):
         verbose_name = "Rebuzz Upvote Notification"
 
     def __str__(self):
-        return f"{self.agent.username} upvoted rebuzz(id:{self.rebuzz.id}) on {self.timestamp}"
+        return f"{self.agent.username} upvoted your rebuzz"
 
 
 class DownvoteRebuzzNotification(BaseNotification):
@@ -177,7 +175,7 @@ class DownvoteRebuzzNotification(BaseNotification):
         verbose_name = "Rebuzz Downvote Notification"
 
     def __str__(self):
-        return f"{self.agent.username} downvoted rebuzz(id:{self.rebuzz.id}) on {self.timestamp}"
+        return f"{self.agent.username} downvoted your rebuzz"
 
 
 class CommentRebuzzNotification(BaseNotification):
@@ -206,7 +204,7 @@ class CommentRebuzzNotification(BaseNotification):
         verbose_name = "Rebuzz Comment Notification"
 
     def __str__(self):
-        return f"{self.agent.username} commented on rebuzz(id:{self.rebuzz.id}) on {self.timestamp}"
+        return f"{self.agent.username} commented on your rebuzz"
 
 
 #########################################
@@ -235,7 +233,7 @@ class UpvoteCommentNotification(BaseNotification):
         verbose_name = "Comment Upvote Notification"
 
     def __str__(self):
-        return f"{self.agent.username} upvoted comment(id:{self.comment.id}) on {self.timestamp}"
+        return f"{self.agent.username} upvoted your comment"
 
 
 class DownvoteCommentNotification(BaseNotification):
@@ -259,7 +257,7 @@ class DownvoteCommentNotification(BaseNotification):
         verbose_name = "Comment Downvote Notification"
 
     def __str__(self):
-        return f"{self.agent.username} downvoted comment(id:{self.comment.id}) on {self.timestamp}"
+        return f"{self.agent.username} downvoted your comment"
 
 
 class ReplyCommentNotification(BaseNotification):
@@ -289,7 +287,7 @@ class ReplyCommentNotification(BaseNotification):
         verbose_name = "Comment Reply Notification"
 
     def __str__(self):
-        return f"{self.agent.username} replied on comment(id:{self.comment.id}) on {self.timestamp}"
+        return f"{self.agent.username} replied on your your comment"
 
 
 #########################################
@@ -367,7 +365,9 @@ class AcceptedFollowerRequestNotification(BaseNotification):
         return f"Follower Accept Request Notification- id:{self.user.id}"
 
     def get_follower_request_accept_notification(self):
-        return f"{self.follow_requester.username} accepted your request to followed you."
+        return (
+            f"{self.follow_requester.username} accepted your request to followed them"
+        )
 
 
 class RejectedFollowerRequestNotification(BaseNotification):
@@ -375,13 +375,13 @@ class RejectedFollowerRequestNotification(BaseNotification):
 
     user = models.ForeignKey(
         CustomUser,
-        related_name="user_new_follower_request_rejted_notification",
+        related_name="user_new_follower_request_rejected_notification",
         on_delete=models.CASCADE,
     )
 
     follow_requester = models.ForeignKey(
         CustomUser,
-        related_name="notification_for_rejted_following_request",
+        related_name="notification_for_rejected_following_request",
         on_delete=models.CASCADE,
     )
 
@@ -392,6 +392,4 @@ class RejectedFollowerRequestNotification(BaseNotification):
         return f"Follower Reject Request Notification- id:{self.user.id}"
 
     def get_follower_request_reject_notification(self):
-        return (
-            f"{self.follow_requester.username} rejectted your request to followed you."
-        )
+        return f"{self.follow_requester.username} rejected your request to follow them"
