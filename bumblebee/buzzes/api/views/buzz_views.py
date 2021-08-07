@@ -49,10 +49,14 @@ class UserBuzzListView(APIView):
             )
 
             if user_instance.profile.private:
-                raise PermissionDenied(
-                    detail="Private Profile",
-                    code="User has made their profile private.",
-                )
+                if self.request.user.id in user_instance.user_follower.follower:
+                    return user_instance
+
+                else:
+                    raise PermissionDenied(
+                        detail="Private Profile",
+                        code="User has made their profile private.",
+                    )
 
             return user_instance
         else:

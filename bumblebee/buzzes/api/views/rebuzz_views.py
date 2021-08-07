@@ -50,15 +50,20 @@ class UserRebuzzListView(APIView):
         url_username = self.kwargs.get("username", False)
 
         if url_username:
+
             user_instance = DbExistenceChecker().check_return_user_existence(
                 username=url_username
             )
 
             if user_instance.profile.private:
-                raise PermissionDenied(
-                    detail="User has made their profile private.",
-                    code="Private Profile",
-                )
+                if self.request.user.id in user_instance.user_follower.follower:
+                    return user_instance
+
+                else:
+                    raise PermissionDenied(
+                        detail="Private Profile",
+                        code="User has made their profile private.",
+                    )
 
             return user_instance
         else:

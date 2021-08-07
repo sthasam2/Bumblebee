@@ -52,7 +52,11 @@ class ProfileDetailView(APIView):
             else:
                 # private
                 if profile_instance.private:
-                    serializer = self.alternative_serializer_class(profile_instance)
+                    # follower
+                    if request.user.id in profile_instance.user.user_follower.follower:
+                        serializer = self.serializer_class(profile_instance)
+                    else:
+                        serializer = self.alternative_serializer_class(profile_instance)
                 # public
                 else:
                     serializer = self.serializer_class(profile_instance)
