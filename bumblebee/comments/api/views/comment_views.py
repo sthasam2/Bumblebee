@@ -416,6 +416,7 @@ class CreateCommentView(APIView):
                 )
                 interaction = buzz_instance.buzz_interaction
                 interaction.comments.append(created_comment.id)
+                interaction.save()
 
                 # create notification
                 create_notification(
@@ -435,6 +436,7 @@ class CreateCommentView(APIView):
                 )
                 interaction = rebuzz_instance.rebuzz_interaction
                 interaction.comments.append(created_comment.id)
+                interaction.save()
 
                 # create notification
                 create_notification(

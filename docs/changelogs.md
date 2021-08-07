@@ -1,5 +1,9 @@
 # Changelogs
 
+## v.0.3.2.1: Bug Fixes
+
+1.  Bug Fixes
+
 ## v.0.3.2: Removed Password Required for profile methods, Bug Fixes
 
 1. Removed Password Required for profile methods

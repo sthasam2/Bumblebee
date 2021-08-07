@@ -1,6 +1,6 @@
 # Bumblebee
 
-![version](https://img.shields.io/badge/version-0.3.2-blue)
+![version](https://img.shields.io/badge/version-0.3.2.1-blue)
 
 A social media for YOU
 
