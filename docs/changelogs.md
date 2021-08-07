@@ -1,5 +1,11 @@
 # Changelogs
 
+## v.0.3.3: Added Search, Refactored, Bug Fixes
+
+1.  Added Search app module
+2.  Refactored Profiles serializers, some view
+3.  Bug Fixes
+
 ## v.0.3.2.4: Bug Fixes
 
 1.  Bug Fixes

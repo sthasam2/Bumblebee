@@ -44,6 +44,7 @@ LOCAL_APPS = [
     "bumblebee.profiles.apps.ProfilesConfig",
     "bumblebee.sentiment_analysis.apps.SentimentAnalysisConfig",
     "bumblebee.users.apps.UsersConfig",
+    "bumblebee.search.apps.SearchConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

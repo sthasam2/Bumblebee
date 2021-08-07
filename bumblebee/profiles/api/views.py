@@ -43,10 +43,7 @@ class ProfileDetailView(APIView):
             profile_instance = get_profile_from_url_username_or_raise(**kwargs)
             self.check_object_permissions(request, profile_instance)
             # check owner
-            if (
-                request.user.is_authenticated
-                and request.user.id == profile_instance.user.id
-            ):
+            if request.user.id == profile_instance.user.id:
                 serializer = self.owner_serializer_class(profile_instance)
             # if not owner
             else:

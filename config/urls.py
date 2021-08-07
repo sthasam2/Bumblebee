@@ -24,6 +24,7 @@ urlpatterns = [
         include("bumblebee.notifications.urls"),
         name="notifications",
     ),
+    path("api/search/", include("bumblebee.search.urls"), name="search"),
 ]
 
 if DEBUG:

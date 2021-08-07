@@ -4,11 +4,12 @@ from bumblebee.core.exceptions import UnknownModelFieldsError
 from bumblebee.profiles.models import Profile
 
 
-class ProfileOwnerSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     """ """
 
     user_id = serializers.IntegerField(source="user.id")
     username = serializers.CharField(source="user.username")
+    email = serializers.EmailField(source="user.email")
     created_date = serializers.DateTimeField()
     updated_date = serializers.DateTimeField()
     account_verified = serializers.BooleanField()
@@ -47,6 +48,7 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
     blocked_count = serializers.SerializerMethodField()
 
     class Meta:
+        abstract = True
         model = Profile
         fields = [
             "user_id",
@@ -65,6 +67,7 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
             "location",
             "phone",
             "phone_verified",
+            "email",
             "private",
             "followers_count",
             "following_count",
@@ -85,42 +88,39 @@ class ProfileOwnerSerializer(serializers.ModelSerializer):
         return len(obj.user.user_blocked.blocked)
 
 
-class ProfilePublicSerializer(serializers.ModelSerializer):
+class ProfileOwnerSerializer(ProfileSerializer):
     """ """
 
-    username = serializers.CharField(source="user.username")
-    account_verified = serializers.BooleanField()
+    class Meta:
+        model = Profile
+        fields = [
+            "user_id",
+            "username",
+            "created_date",
+            "updated_date",
+            "account_verified",
+            "use_persona",
+            "persona",
+            "avatar",
+            "cover",
+            "bio",
+            "name",
+            "nickname",
+            "dob",
+            "location",
+            "phone",
+            "phone_verified",
+            "email",
+            "private",
+            "followers_count",
+            "following_count",
+            "muted_count",
+            "blocked_count",
+        ]
 
-    use_persona = serializers.BooleanField()
-    persona = serializers.IntegerField()
-    avatar = serializers.ImageField()
-    cover = serializers.ImageField()
-    bio = serializers.CharField(
-        help_text="What's on your mind?",
-    )
-    name = serializers.CharField(
-        help_text="Full Name. For eg. Will Smith ",
-    )
-    nickname = serializers.CharField(
-        help_text="Nickname. The name you want to be called. For eg. Will",
-    )
-    dob = serializers.DateTimeField(
-        style={"input_type": "datetime-local", "placeholder": "Date and Time of birth"},
-        help_text="The date and time of your birth",
-    )
-    location = serializers.CharField(
-        help_text="User Location. Street, Municipality/VDC, State, Country",
-    )
-    phone = serializers.CharField(
-        help_text="Contact digits. eg. +97798XXYYZZWW",
-    )
-    phone_verified = serializers.BooleanField(
-        help_text="Contact number verified",
-    )
-    # notifications
-    #  connections
-    followers_count = serializers.SerializerMethodField()
-    following_count = serializers.SerializerMethodField()
+
+class ProfilePublicSerializer(ProfileSerializer):
+    """ """
 
     class Meta:
         model = Profile
@@ -138,29 +138,14 @@ class ProfilePublicSerializer(serializers.ModelSerializer):
             "location",
             "phone",
             "phone_verified",
+            "email",
             "followers_count",
             "following_count",
         ]
 
-    def get_followers_count(self, obj):
-        return len(obj.user.user_follower.follower)
 
-    def get_following_count(self, obj):
-        return len(obj.user.user_following.following)
-
-
-class ProfilePrivateSerializer(serializers.Serializer):
+class ProfilePrivateSerializer(ProfileSerializer):
     """ """
-
-    user_id = serializers.IntegerField(source="user.id")
-    username = serializers.CharField(source="user.username")
-    account_verified = serializers.BooleanField()
-    use_persona = serializers.BooleanField()
-    persona = serializers.IntegerField()
-    avatar = serializers.ImageField()
-    cover = serializers.ImageField()
-    nickname = serializers.CharField()
-    private = serializers.BooleanField()
 
     class Meta:
         model = Profile
@@ -177,10 +162,22 @@ class ProfilePrivateSerializer(serializers.Serializer):
         ]
 
 
-class ProfileSummarySerializer(ProfilePrivateSerializer):
+class ProfileSummarySerializer(ProfileSerializer):
     """ """
 
-    pass
+    class Meta:
+        model = Profile
+        fields = [
+            "user_id",
+            "username",
+            "account_verified",
+            "use_persona",
+            "persona",
+            "avatar",
+            "cover",
+            "nickname",
+            "private",
+        ]
 
 
 class UpdateProfileSerializer(serializers.ModelSerializer):
