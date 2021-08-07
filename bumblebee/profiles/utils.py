@@ -41,24 +41,29 @@ def get_profile_from_url_username_or_raise(**kwargs):
 def check_fields(req_data, field_options=None, required_fields=None):
     """ """
 
-    if req_data.__len__() == 0:
-        raise MissingFieldsError(
-            "No fields provided",
-            create_400(
-                400,
-                "Missing Fields",
-                f"No fields were provided",
-            ),
-        )
     if required_fields is not None:
-        RequestFieldsChecker().check_required_field_or_raise(req_data, required_fields)
+        if len(required_fields) != 0:
+            RequestFieldsChecker().check_required_field_or_raise(
+                req_data, required_fields
+            )
 
     if field_options is not None:
-        RequestFieldsChecker().check_at_least_one_field_or_raise(
-            req_data, field_options
-        )
+        if len(field_options) != 0:
+            RequestFieldsChecker().check_at_least_one_field_or_raise(
+                req_data, field_options
+            )
 
     if required_fields is not None and field_options is not None:
+        if req_data.__len__() == 0:
+            raise MissingFieldsError(
+                "No fields provided",
+                create_400(
+                    400,
+                    "Missing Fields",
+                    f"No fields were provided",
+                ),
+            )
+
         RequestFieldsChecker().check_extra_fields_or_raise(
             req_data, field_options, required_fields
         )

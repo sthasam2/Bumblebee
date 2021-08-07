@@ -19,7 +19,7 @@ def create_500(cause=None, verbose=None) -> dict:
     }
 
 
-def create_400(status: int, message: str, detail: str) -> dict:
+def create_400(status: int, message: str, detail: str, cause: str = None) -> dict:
     """
     creates a dictionary with error code, message, detail
     """
@@ -28,11 +28,12 @@ def create_400(status: int, message: str, detail: str) -> dict:
         "error": {
             "message": message,
             "detail": detail,
+            "cause": cause,
         },
     }
 
 
-def create_200(status: int, message: str, detail: str) -> dict:
+def create_200(status: int, message: str, detail: str, cause: str = None) -> dict:
     """
     creates a dictionary with success code, message, message
     """
@@ -41,6 +42,7 @@ def create_200(status: int, message: str, detail: str) -> dict:
         "success": {
             "message": message,
             "detail": detail,
+            "cause": cause,
         },
     }
 

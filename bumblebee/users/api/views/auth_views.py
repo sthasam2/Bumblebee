@@ -76,6 +76,7 @@ class RegisterView(CreateAPIView):
                             status.HTTP_400_BAD_REQUEST,
                             "Already exists",
                             f'User with email "{email}" already exists. Try a different email',
+                            "email",
                         ),
                     )
 
@@ -86,6 +87,7 @@ class RegisterView(CreateAPIView):
                             status.HTTP_400_BAD_REQUEST,
                             "Already exists",
                             f'User with username "{username}" already exists. Try a different username',
+                            "username",
                         ),
                     )
 
@@ -113,6 +115,7 @@ class RegisterView(CreateAPIView):
                         status.HTTP_400_BAD_REQUEST,
                         "Missing Fields",
                         "Either of the required fields email, username, and/or password is missing.",
+                        "request body",
                     ),
                 )
 
@@ -171,6 +174,7 @@ class ResendEmailVerificationView(APIView):
                             400,
                             "Non existence",
                             f"Account with email {email} credentials does not exist! Check email or sign up using a different email",
+                            "email",
                         ),
                     )
 
@@ -192,6 +196,7 @@ class ResendEmailVerificationView(APIView):
                             400,
                             "Already verified",
                             "`email` already verified.",
+                            "verified",
                         ),
                     )
 
@@ -202,6 +207,7 @@ class ResendEmailVerificationView(APIView):
                         status.HTTP_400_BAD_REQUEST,
                         "Missing fields",
                         "`email` field is mandatory. Please provide email",
+                        "reqbody:email",
                     ),
                 )
 
@@ -254,6 +260,7 @@ class LogoutView(APIView):
                         400,
                         "Missing Fields",
                         "`refresh` must be provided with refresh token",
+                        "reqbody:refresh",
                     ),
                 )
 
@@ -290,9 +297,10 @@ class SendResetPasswordView(APIView):
                     raise NoneExistenceError(
                         email,
                         create_400(
-                            400,
+                            404,
                             "Non existence",
                             f"Account with email {email} credentials does not exist!",
+                            "email",
                         ),
                     )
 
@@ -314,6 +322,7 @@ class SendResetPasswordView(APIView):
                         status.HTTP_400_BAD_REQUEST,
                         "Missing fields",
                         "`email` field is mandatory. Please provide email",
+                        "reqbod:email",
                     ),
                 )
 
@@ -364,9 +373,10 @@ class VerifyEmailView(APIView):
                 raise NoneExistenceError(
                     "User",
                     create_400(
-                        400,
+                        404,
                         "Non existence",
                         "User associated to token does not exist",
+                        "token",
                     ),
                 )
 
@@ -377,18 +387,14 @@ class VerifyEmailView(APIView):
             except (TypeError, ValueError, OverflowError, EmailToken.DoesNotExist):
                 raise NoneExistenceError(
                     "Email Token",
-                    create_400(
-                        400,
-                        "Non existence",
-                        "Token does not exist",
-                    ),
+                    create_400(400, "Non existence", "Token does not exist", "token"),
                 )
 
             # check expired
             if email_token.check_expired:
                 raise ExpiredError(
                     "Email Token",
-                    create_400(400, "Expired", "Email Token already expired!"),
+                    create_400(400, "Expired", "Email Token already expired!", "token"),
                 )
 
             # check token user and uid match

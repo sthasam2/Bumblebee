@@ -1,6 +1,6 @@
 create database bumblebee;
 
-create user admin with encrypted password admin;
+create user admin with encrypted password 'admin';
 
 grant all privileges on database bumblebee to "admin";
 

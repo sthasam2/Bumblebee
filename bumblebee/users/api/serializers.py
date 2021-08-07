@@ -1,7 +1,10 @@
 from django.db.models.fields import EmailField
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import AuthenticationFailed
 
+from bumblebee.core.exceptions import CustomAuthenticationFailed
+from bumblebee.core.helpers import create_400
 from ..models import CustomUser
 from ..utils import DbExistenceChecker
 
@@ -120,17 +123,28 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # username = attrs["username"]
         # exists = DbExistenceChecker().check_username_existence
+        try:
+            data = super().validate(attrs)
 
-        data = super().validate(attrs)
+            data["user_details"] = dict(
+                username=self.user.username,
+                email=self.user.email,
+                id=self.user.id,
+                email_verified=self.user.email_verified,
+            )
 
-        data["user_details"] = dict(
-            username=self.user.username,
-            email=self.user.email,
-            id=self.user.id,
-            email_verified=self.user.email_verified,
-        )
+            return data
 
-        return data
+        except AuthenticationFailed as error:
+            raise CustomAuthenticationFailed(
+                "Autentication",
+                create_400(
+                    404,
+                    "Invalid username or password",
+                    f"Account with given credentials does not exist!",
+                    "email/password",
+                ),
+            )
 
 
 ##########################
