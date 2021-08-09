@@ -1,5 +1,10 @@
 # Changelogs
 
+## v.0.3.3.1: Modifications
+
+1.  Modified search behaviour
+  
+
 ## v.0.3.3: Added Search, Refactored, Bug Fixes
 
 1.  Added Search app module

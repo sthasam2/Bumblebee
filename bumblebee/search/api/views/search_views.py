@@ -31,12 +31,14 @@ class SearchView(APIView):
 
             if keyword is not None:
                 buzzes = Buzz.objects.filter(
-                    Q(content__icontains=keyword) | Q(author__username=keyword)
+                    Q(content__icontains=keyword)
+                    | Q(author__username__icontains=keyword)
                 ).exclude(privacy="priv")
                 rebuzzes = Rebuzz.objects.filter(
-                    Q(content__icontains=keyword) | Q(author__username=keyword)
+                    Q(content__icontains=keyword)
+                    | Q(author__username__icontains=keyword)
                 ).exclude(privacy="priv")
-                users = CustomUser.objects.filter(Q(username=keyword))
+                users = CustomUser.objects.filter(Q(username__icontains=keyword))
 
                 return dict(buzzes=buzzes, rebuzzes=rebuzzes, users=users)
 
