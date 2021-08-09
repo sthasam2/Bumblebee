@@ -71,4 +71,6 @@ def get_follow_suggestions_for_user(owner_user):
         return CustomUser.objects.filter(id__in=filtered_ids)
 
     else:
-        return CustomUser.objects.all()[:10]
+        return CustomUser.objects.all().exclude(
+            Q(id=owner_user.id), Q(id__in=following_ids), Q(id__in=blacklist_ids)
+        )[:10]

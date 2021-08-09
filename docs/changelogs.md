@@ -1,5 +1,9 @@
 # Changelogs
 
+## v.0.3.3.2: Bug Fixes
+
+1.  Bug Fixes
+
 ## v.0.3.3.1: Modifications
 
 1.  Modified search behaviour
