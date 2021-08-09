@@ -56,13 +56,13 @@ def get_follow_suggestions_for_user(owner_user):
     following_ids = owner_user.user_following.following
     blacklist_ids = owner_user.user_muted.muted + owner_user.user_blocked.blocked
 
+    ids_to_exclude = following_ids + blacklist_ids + [owner_user.id]
+
     rec_ids = []
     for account in CustomUser.objects.filter(id__in=following_ids):
         rec_ids += account.user_following.following
 
-    filtered_ids = list(
-        set(rec_ids) - set(following_ids) - set(blacklist_ids) - set([owner_user.id])
-    )
+    filtered_ids = list(set(rec_ids) - set(ids_to_exclude))
 
     if len(filtered_ids) >= 10:
         return CustomUser.objects.filter(id__in=select_max_10_random(filtered_ids))[:10]
@@ -71,6 +71,4 @@ def get_follow_suggestions_for_user(owner_user):
         return CustomUser.objects.filter(id__in=filtered_ids)
 
     else:
-        return CustomUser.objects.all().exclude(
-            Q(id=owner_user.id), Q(id__in=following_ids), Q(id__in=blacklist_ids)
-        )[:10]
+        return CustomUser.objects.exclude(id__in=ids_to_exclude)[:10]
