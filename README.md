@@ -55,3 +55,74 @@ To check more dependencies enter command
 ```python
 poetry show
 ```
+
+## Setup Database
+
+Open postgres terminal
+
+* **Windows**
+
+1. On windows, after installation of Postgres open the `SQL Shell (psql)` app. (You can find it on search menu)
+
+![Start SQL Shell](docs/images/start-psql.png)
+
+2. Login to the shell by using default values (ie blanks) except the `password`. Use the password you had createed during postgres setup.
+
+![SQL Shell](docs/images/psql.png)
+
+3. Run database script found @*[database sql script](scripts/database.sql)* by copying everthing into the postgres shell
+
+4. Use `\l` command to check databases.
+
+![SQL Shell Databases](docs/images/databases.png)
+
+if `bumblebee` database appears, the database is set up.
+
+* **Linux**
+
+1. After installation, open postgres in terminal using
+   
+   
+
+```BASH
+   sudo -u postgres psql
+   ```
+
+This opens the postgres shell using user *postgres*.
+
+2. Run database script found @*[database sql script](scripts/database.sql)* by copying everthing into the postgres shell
+
+3. Use `\l` command to check databases.
+<!-- 
+
+![SQL Shell Databases](docs/images/databases.png)
+
+ -->
+
+if `bumblebee` database appears, the database is set up.
+
+## Create Django Migrations
+
+**REMEMBER TO ACTIVATE VIRTUAL ENVIRONMENT**
+
+In order to setup django app tables, migations must be made. it can be done simply by the commands 
+
+```BASH
+python manage.py makemigrations
+```
+
+To apply migrations, use command.
+
+```BASH
+python manage.py migrate
+```
+
+Then the migrations should be applied and the database is ready.
+
+*Note sometimes migrations may not work, and in such cases makemigrations should explicitly mention the apps explicitly like*
+
+ 
+
+```
+ python manage.py makemigrations activities, admin, auth, buzzes, comments, connections, contenttypes, feeds, notifications, profiles, sessions, token_blacklist, user
+ ```
