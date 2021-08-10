@@ -749,14 +749,36 @@ class DeleteCommentView(APIView):
                 ),
             )
 
+    def _delete_interactions(self, comment_to_delete, comment_id):
+        """Delete parent interactions"""
+
+        buzz_instance = comment_to_delete.parent_buzz
+        rebuzz_instance = comment_to_delete.parent_rebuzz
+        comment_instance = comment_to_delete.parent_comment
+
+        if buzz_instance:
+            buzz_instance.buzz_interaction.comments.remove(comment_id)
+            buzz_instance.save()
+
+        if rebuzz_instance:
+            rebuzz_instance.rebuzz_interaction.comments.remove(comment_id)
+            rebuzz_instance.save()
+
+        if comment_instance:
+            comment_instance.commenr_interaction.comment.remove(comment_id)
+            comment_instance.save()
+
     def delete(self, request, *args, **kwargs):
         """ """
 
         try:
-
             comment_to_delete = self._get_url_comment(**kwargs)
             self.check_object_permissions(request, comment_to_delete)
+
+            comment_id = comment_to_delete.id
             comment_to_delete.delete()
+
+            self._delete_interactions(comment_to_delete, comment_id)
 
             return Response(
                 create_200(
